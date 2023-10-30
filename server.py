@@ -18,7 +18,7 @@ dadosBanco = (
                f'Port={port};'
 )   
 
-@app.route("/")
+@app.get("/")
 def helloWorld():
     try:
         conexao = pyodbc.connect(dadosBanco)
@@ -34,4 +34,4 @@ def helloWorld():
         return jsonify({'erro': str(e)})
 
 if __name__ == "__main__":
-    app.run(debug=True, port=9001)
+    app.run(debug=True, port=3000)
