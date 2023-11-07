@@ -1,9 +1,9 @@
 from flask import Flask, jsonify
-import pyodbc
+import pymssql
 import dotenv
 import os
-dotenv.load_dotenv()
 
+dotenv.load_dotenv()
 
 app = Flask(__name__)
 
@@ -15,19 +15,22 @@ PASS = os.getenv('BD_PASS')
 BD_PORT = os.getenv('BD_PORT')
 PORT = os.getenv('PORT')
 
-
-dadosBanco = f'DRIVER={{ODBC Driver 18 for SQL Server}};SERVER={SERVER};DATABASE={DATABASE};UID={USER};PWD={PASS}'
-
+dadosBanco = {
+    'server': SERVER,
+    'database': DATABASE,
+    'user': USER,
+    'password': PASS,
+    'port': int(BD_PORT),
+}
 
 def desserelizadorResponse(cursor, dados):
     return [dict(zip([column[0] for column in cursor.description], row)) for row in dados]
 
-
 @app.route("/")
 def get_dados():
     try:
-        conexao = pyodbc.connect(dadosBanco)
-        cursor = conexao.cursor()
+        conexao = pymssql.connect(**dadosBanco)
+        cursor = conexao.cursor(as_dict=True)  # Use as_dict=True to return results as dictionaries
         cursor.execute('select * from usuarios')
         dados = cursor.fetchall()
         conexao.close()
@@ -37,7 +40,6 @@ def get_dados():
 
     except Exception as e:
         return jsonify({'Error': str(e)})
-
 
 if __name__ == '__main__':
     app.run(debug=DEBUG, port=PORT)
