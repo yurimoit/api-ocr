@@ -1,42 +1,43 @@
 from flask import Flask, jsonify
-from decouple import config
 import pyodbc
+import dotenv
 import os
+dotenv.load_dotenv()
+
 
 app = Flask(__name__)
 
-server = 'leitorappocr.database.windows.net'
-database = 'leitor-ocr'
-username = 'azurer'
-password = 'Destroi96&'
-port = 1433
+DEBUG = os.getenv('DEBUG', default=False)
+SERVER = os.getenv('BD_SERVER')
+DATABASE = os.getenv('BD_NAME')
+USER = os.getenv('BD_USER')
+PASS = os.getenv('BD_PASS')
+BD_PORT = os.getenv('BD_PORT')
+PORT = os.getenv('PORT')
 
-PORT = config('PORT')
-DEBUG = config('DEBUG', default=False, cast=bool)
 
-dadosBanco = (
-    'Driver={ODBC Driver 18 for SQL Server};'
-    f'Server={server};'
-    f'Database={database};'
-    f'Uid={username};'
-    f'Pwd={password};'
-    f'Port={port};'
-)
+dadosBanco = f'DRIVER={{ODBC Driver 18 for SQL Server}};SERVER={SERVER};DATABASE={DATABASE};UID={USER};PWD={PASS}'
+
+
+def desserelizadorResponse(cursor, dados):
+    return [dict(zip([column[0] for column in cursor.description], row)) for row in dados]
+
 
 @app.route("/")
-def helloWorld():
+def get_dados():
     try:
         conexao = pyodbc.connect(dadosBanco)
         cursor = conexao.cursor()
-        cursor.execute("select * from usuarios")
-        resultado = cursor.fetchall()
+        cursor.execute('select * from usuarios')
+        dados = cursor.fetchall()
         conexao.close()
+        resultado = desserelizadorResponse(cursor, dados)
 
-        data_list = [dict(zip([column[0] for column in cursor.description], row)) for row in resultado]
+        return jsonify({'Dados': resultado})
 
-        return jsonify({'resultado': data_list})
-    except pyodbc.Error as e:
-        return jsonify({'erro': str(e)})
+    except Exception as e:
+        return jsonify({'Error': str(e)})
 
-if __name__ == "__main__":
-    app.run(debug=DEBUG, port=int(PORT))
+
+if __name__ == '__main__':
+    app.run(debug=DEBUG, port=PORT)
