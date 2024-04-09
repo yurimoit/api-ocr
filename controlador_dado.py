@@ -3,6 +3,7 @@ import re
 import copy
 from difflib import SequenceMatcher
 from flask import jsonify
+import os
 
 
 def buscar_dados(texto_gerado, lista, list_captura_dados):
@@ -37,7 +38,6 @@ def buscar_dados(texto_gerado, lista, list_captura_dados):
 
         nova_palavra: str = ''
         textos_lines = texto_gerado.splitlines()
-        print(textos_lines)
 
         lista_de_referencia = ["/mm3", '/mm', 'g/dl', '%', 'fl',
                                'pg', 'u3', 'g3', '&', 'de', "‘", "`", 't', 'u³', '/mm³', 'milhões/mm³', '£1', '£2']
@@ -61,7 +61,7 @@ def buscar_dados(texto_gerado, lista, list_captura_dados):
                         if item and not item.isalpha():
                             numero_dado.append(item.strip())
 
-                    print(numero_dado)
+                    # print(numero_dado)
 
                 else:
                     continue
@@ -109,7 +109,7 @@ def buscar_dados(texto_gerado, lista, list_captura_dados):
 
                                 padrao = re.compile(r'\d{1}[a-zA-Z]\d{1}')
                                 if padrao.search(numero_dado[1]):
-                                    print('Foi aqui', numero_dado[1])
+                                    # print('Foi aqui', numero_dado[1])
                                     separa_valores_referencia = numero_dado[1].split(
                                         'a')
                                     if len(separa_valores_referencia) > 1:
@@ -136,9 +136,9 @@ def buscar_dados(texto_gerado, lista, list_captura_dados):
                             break
 
                     lista_padrao.remove(palavra_padrao)
-                    print(lista_padrao)
+                    # print(lista_padrao)
                     break
-
+        # print(*lista_dados_finais, sep='\n')
         return lista_dados_finais
     except TypeError:
         return jsonify({'mensagem': "Erro no servidor"}), 500
@@ -154,6 +154,8 @@ def corrigir_dados(lista_dados):
                 if '.' in (dicionario[chave]):
                     separador = (dicionario[chave]).split('.')
 
+                    print(separador)
+
                     if (dicionario['nome'] == 'hemacias') and (len(dicionario[chave]) >= 4):
                         lista_palavra_hemacias = list(
                             (dicionario[chave]).replace('.', ''))
@@ -163,6 +165,9 @@ def corrigir_dados(lista_dados):
 
                     padrao = re.compile(r'\d{1}[.]\d{3}[.]\d{1}')
                     if padrao.search(dicionario[chave]):
+
+                        print(dicionario[chave])
+
                         dicionario[chave] = (dicionario[chave][0:(
                             len(dicionario[chave])-1)]).replace('.', '')
 
@@ -182,6 +187,16 @@ def corrigir_dados(lista_dados):
                                 dicionario[chave] = separador[0] + \
                                     separador[1][0] + \
                                     separador[1][1]+separador[1][2]
+
+                            continue
+
+                        if dicionario['nome'] == 'hematocrito':
+
+                            if (len(separador[0]) <= 2) and (len(separador[1]) == 3):
+                                dicionario[chave] = round(
+                                    float(dicionario[chave]), 2)
+
+                            continue
 
                         if (len(separador[0]) <= 2) and (len(separador[1]) == 3):
                             dicionario[chave] = (
@@ -218,12 +233,9 @@ def analisa_dados_range_referencia(lista_dados):
             referencia_valor = float(dicionario[referencia])
 
             if referencia_a <= referencia_valor <= referencia_b:
-                print(
-                    f'{dicionario["nome"]} esta dentro da referencia: valor: {referencia_valor}')
+                # print(
+                #     f'{dicionario["nome"]} esta dentro da referencia: valor: {referencia_valor}')
                 continue
-
-            dicionario['valoRA'] = '--'
-            dicionario['valorB'] = '--'
 
         return lista_dados
     except TypeError:

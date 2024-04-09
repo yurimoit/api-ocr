@@ -35,7 +35,7 @@ def cadastrar_usuario():
     senha = request.json.get('senha')
     is_doutor = request.json.get('is_doutor')
 
-    print(nome, email, senha, is_doutor)
+    # print(nome, email, senha, is_doutor)
 
     cursor = None
     conn_conecta = connectar_banco()
@@ -57,7 +57,6 @@ def cadastrar_usuario():
                        (usuario['nome'], usuario['email'], usuario['senha'], usuario['is_doutor']))
 
         id_inserido = cursor.lastrowid
-        print(id_inserido)
 
         conn_conecta.commit()
 
@@ -84,7 +83,7 @@ def login_usuario():
     email = request.json.get('email')
     senha = request.json.get('senha')
 
-    print("Aqui: ", email, senha)
+    # print("Aqui: ", email, senha)
 
     cursor = None
     conn = None
@@ -97,8 +96,6 @@ def login_usuario():
             "select * from usuarios where email=%s", (email,))
         usuario = cursor.fetchone()
 
-        print(usuario)
-
         if not usuario or usuario is None:
             return jsonify({'mensagem': 'E-mail ou Senha, invalidos'}), 404
 
@@ -109,16 +106,12 @@ def login_usuario():
         if not bcrypt.check_password_hash(hash_senha, senha.encode('utf-8')):
             return jsonify({'mensagem': 'Email ou senha inválidos'}), 404
 
-        print('Passou do bcrtpt')
-
         token = jwt.encode({'id': usuario[0]}, SENHA_JWT, algorithm='HS256')
-
-        print(token)
 
         return jsonify({'usuario': {'id': usuario[0], 'nome': usuario[1], 'email': usuario[2]}, 'token': token}), 200
 
     except Exception as e:
-        print("Erro ao tentar fazer o Login usuário:", e)
+        # print("Erro ao tentar fazer o Login usuário:", e)
         return jsonify({'error': 'Erro no servidor'}), 500
 
     finally:
@@ -131,8 +124,6 @@ def login_usuario():
 def atualizar_usuario():
     data = request.get_json()
     usuario = request.usuario
-
-    print(usuario)
 
     novo_nome = data['novo_nome']
     novo_email = data['novo_email']
@@ -190,7 +181,7 @@ def atualizar_usuario():
         return jsonify(atualizacao), 201
 
     except Exception as e:
-        print("Erro ao tentar atualiza usuario usuário:", e)
+        # print("Erro ao tentar atualiza usuario usuário:", e)
         return jsonify({'error': 'Erro no servidor'}), 500
 
     finally:

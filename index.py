@@ -7,7 +7,7 @@ from io import BytesIO
 from flask import Flask, jsonify, request
 import flask_cors
 from controladorArquivo.controlador_arquivos import analisa_text
-from func_banco_dados import get_banco, inserir_exame_no_banco_dados, atualiza_exame_no_banco_dados, deletar_exame_banco_dados, buscar_exames
+from func_banco_dados import get_banco, inserir_exame_no_banco_dados, atualiza_exame_no_banco_dados, deletar_exame_banco_dados, buscar_exames, get_banco_exames
 from controladoresUuario.controlador_usuario import cadastrar_usuario, login_usuario, atualizar_usuario
 from autorization import verificar_autenticacao
 
@@ -36,7 +36,6 @@ DATA_BASE = os.environ.get('database')
 USER = os.environ.get('user')
 PASSWORD = os.environ.get('password')
 
-print(HOST)
 
 
 # Criar uma instância do B2Api
@@ -94,7 +93,6 @@ def upload_file():
                 file_name=original_name,
                 content_type=mime_type
             )
-            print(file_enviado)
             file_info_serializable = file_enviado.as_dict()["fileId"]
 
             return jsonify({"file_enviado": file_info_serializable, "path": original_name})
@@ -216,6 +214,13 @@ def post_buscar_exames_dados_route():
 def get_banco_route():
     """Fazer um get dos dados no banco"""
     return get_banco()
+
+
+@app.route('/getBanco/exames', methods=['GET'])
+@verificar_autenticacao
+def get_banco_exame_route():
+    """Fazer um get dos dados no banco"""
+    return get_banco_exames()
 
 
 if __name__ == '__main__':

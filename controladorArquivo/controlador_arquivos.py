@@ -32,9 +32,6 @@ def ocr_image_to_text(image):
         image_enhanced = enhancer.enhance(2)
 
         text = pytesseract.image_to_string(image_enhanced)
-        os.system('clear')
-        print(text)
-
         return text
     except Exception as e:
         print(f"Erro ao extrair texto do arquivo: {e}")

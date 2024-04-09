@@ -43,3 +43,98 @@ lista_informacoes_buscada = ['hemacias',
                              'eosinofilos',
                              'basafilos',
                              'plaquetas']
+
+
+lista_dados = {
+    'hemacias': {
+        'lista_dados': [],
+        'lista_dados_inferior': [],
+        'lista_dados_superior': [],
+        'lista_datas': []
+    },
+    'hemoglobina': {
+        'lista_dados': [],
+        'lista_dados_inferior': [],
+        'lista_dados_superior': [],
+        'lista_datas': []
+    },
+    'hematocrito': {
+        'lista_dados': [],
+        'lista_dados_inferior': [],
+        'lista_dados_superior': [],
+        'lista_datas': []
+    },
+    'vcm': {
+        'lista_dados': [],
+        'lista_dados_inferior': [],
+        'lista_dados_superior': [],
+        'lista_datas': []
+    },
+
+    'hcm': {
+        'lista_dados': [],
+        'lista_dados_inferior': [],
+        'lista_dados_superior': [],
+        'lista_datas': []
+    },
+    'chcm': {
+        'lista_dados': [],
+        'lista_dados_inferior': [],
+        'lista_dados_superior': [],
+        'lista_datas': []
+    },
+    'rdw': {
+        'lista_dados': [],
+        'lista_dados_inferior': [],
+        'lista_dados_superior': [],
+        'lista_datas': []
+    },
+    'leucocitos - global': {
+        'lista_dados': [],
+        'lista_dados_inferior': [],
+        'lista_dados_superior': [],
+        'lista_datas': []
+    },
+    'neutrofilos bastonetes': {
+        'lista_dados': [],
+        'lista_dados_inferior': [],
+        'lista_dados_superior': [],
+        'lista_datas': []
+    },
+    'neutrofilos segmentados': {
+        'lista_dados': [],
+        'lista_dados_inferior': [],
+        'lista_dados_superior': [],
+        'lista_datas': []
+    },
+    'linfocitos': {
+        'lista_dados': [],
+        'lista_dados_inferior': [],
+        'lista_dados_superior': [],
+        'lista_datas': []
+    },
+    'monocitos': {
+        'lista_dados': [],
+        'lista_dados_inferior': [],
+        'lista_dados_superior': [],
+        'lista_datas': []
+    },
+    'eosinofilos': {
+        'lista_dados': [],
+        'lista_dados_inferior': [],
+        'lista_dados_superior': [],
+        'lista_datas': []
+    },
+    'basafilos': {
+        'lista_dados': [],
+        'lista_dados_inferior': [],
+        'lista_dados_superior': [],
+        'lista_datas': []
+    },
+    'plaquetas': {
+        'lista_dados': [],
+        'lista_dados_inferior': [],
+        'lista_dados_superior': [],
+        'lista_datas': []
+    }
+}

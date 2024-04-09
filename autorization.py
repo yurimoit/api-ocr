@@ -33,27 +33,22 @@ def verificar_autenticacao(next):
     def verificar_usuario(*args, **kwargs):
         """VERIFICAR AUTENTICACAO DO USUARIO"""
 
-        print('Entrou na funcao autorization')
 
         authorization = request.headers.get('Authorization')
-        print(authorization)
         if not authorization:
             return jsonify({'mensagem': 'Não autorizado'}), 401
 
         token = authorization.split(' ')[1]
 
-        print(token)
-
         cursor = None
         conn = None
 
         try:
-            print("aqui....")
-            print(SENHA_JWT)
-            print(jwt.decode(token, SENHA_JWT, algorithms=['HS256']))
+            # print("aqui....")
+            # print(SENHA_JWT)
+            # print(jwt.decode(token, SENHA_JWT, algorithms=['HS256']))
             id = jwt.decode(token, SENHA_JWT, algorithms=['HS256'])['id']
 
-            print(id)
 
             # Conectando ao banco de dados
             cursor = connectar_banco().cursor()
@@ -62,7 +57,7 @@ def verificar_autenticacao(next):
             cursor.execute("select * from usuarios where id=%s", (id,))
             resultado = cursor.fetchone()
             connectar_banco().commit()
-            print("Resultado: ", resultado)
+            # print("Resultado: ", resultado)
 
             if not resultado:
                 return jsonify({'mensagem': 'Não autorizado'}), 401
