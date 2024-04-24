@@ -26,10 +26,10 @@ app.config['TEXTO_GERADO'] = ''
 app.config['LISTA_INFORMACAO'] = []
 
 
-KEY_ID = os.environ.get('application_key_id')
-KEY = os.environ.get('application_key')
-NAME = os.environ.get('bucket_name')
-URL = os.environ.get('api_url')
+KEY_ID = os.environ.get('applicationKeyId')
+KEY = os.environ.get('applicationKey')
+NAME = os.environ.get('bucketName')
+URL = os.environ.get('apiUrl')
 
 
 HOST = os.environ.get('host')

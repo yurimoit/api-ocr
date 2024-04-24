@@ -13,7 +13,7 @@ def connectar_banco():
         database=os.getenv('database'),
         user=os.getenv('user'),
         password=os.getenv('password'),
-        port=os.getenv('port_bd')
+        port=os.getenv('portBD')
     )
 
     return conn
