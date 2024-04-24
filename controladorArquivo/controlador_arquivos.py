@@ -2,13 +2,11 @@ import pytesseract
 from PIL import Image, ImageEnhance
 import PyPDF2
 import csv
-import numpy as np
 import os
 import tempfile
 from flask import jsonify
 import docx2txt
 from io import StringIO, BytesIO
-import pandas as pd
 import xlrd
 from controlador_dado import buscar_dados, corrigir_dados, analisa_dados_range_referencia
 from listas.lista_exame_hemograma import list_captura_dados
@@ -19,30 +17,40 @@ def ocr_image_to_text(image):
     """Extração de dados com a biblioteca pytesseract"""
     try:
         with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as temp_image:
-            image.save(temp_image.name)
+            image.save(temp_image.name, optimize=True,
+                       quality=100)
 
-        image = Image.open(temp_image.name)
+        image_open = Image.open(temp_image.name)
 
-        image = image.resize(
-            (image.width * 3, image.height * 3),
+        new_image = image_open.resize(
+            (image_open.width * 3, image_open.height * 3),
             # pylint: disable=E1101
             Image.LANCZOS)
 
-        enhancer = ImageEnhance.Contrast(image)
+        # width, height = image_open.size
+        # new_width = 4000
+        # new_height = round(height*new_width/width)
+
+        # new_image = image_open.resize((new_width, new_height),
+        #                               # pylint: disable=E1101
+        #                               Image.LANCZOS)
+
+        enhancer = ImageEnhance.Contrast(new_image)
         image_enhanced = enhancer.enhance(2)
 
         text = pytesseract.image_to_string(image_enhanced)
+        # print(text)
         return text
-    except Exception as e:
-        print(f"Erro ao extrair texto do arquivo: {e}")
+    except Exception:
+        # print(f"Erro ao extrair texto do arquivo: {e}")
         return jsonify({'mensagem': "Erro no servidor"}), 500
     finally:
         # Excluir o arquivo temporário depois de abrir a imagem
         if 'temp_image' in locals():
             try:
                 os.unlink(temp_image.name)
-            except Exception as e:
-                print(f"Erro ao extrair texto do arquivo: {e}")
+            except Exception:
+                # print(f"Erro ao extrair texto do arquivo: {e}")
                 return jsonify({'mensagem': "Erro no servidor"}), 500
 
 
@@ -53,10 +61,10 @@ def ocr_pdf_to_text(pdf_path):
         pdf_reader = PyPDF2.PdfReader(pdf_path)
         for page in pdf_reader.pages:
             text += page.extract_text()
-        print(text)
+        # print(text)
         return text
-    except Exception as e:
-        print(f"Erro ao extrair texto do arquivo: {e}")
+    except Exception:
+        # print(f"Erro ao extrair texto do arquivo: {e}")
         return jsonify({'mensagem': "Erro no servidor"}), 500
 
 
@@ -68,8 +76,8 @@ def read_text_from_txt(file_bytes):
             for line in file:
                 text += line.decode('utf-8')
         return text
-    except Exception as e:
-        print(f"Erro ao extrair texto do arquivo: {e}")
+    except Exception:
+        # print(f"Erro ao extrair texto do arquivo: {e}")
         return jsonify({'mensagem': "Erro no servidor"}), 500
 
 
@@ -78,8 +86,8 @@ def read_text_from_docx(docx_file):
     try:
         text = docx2txt.process(docx_file)
         return text
-    except Exception as e:
-        print(f"Erro ao extrair texto do arquivo: {e}")
+    except Exception:
+        # print(f"Erro ao extrair texto do arquivo: {e}")
         return jsonify({'mensagem': "Erro no servidor"}), 500
 
 
@@ -95,8 +103,8 @@ def read_text_from_csv(file_text):
         for row in csv_data:
             text += ','.join(row) + '\n'
         return text
-    except Exception as e:
-        print(f"Erro ao extrair texto do arquivo: {e}")
+    except Exception:
+        # print(f"Erro ao extrair texto do arquivo: {e}")
         return jsonify({'mensagem': "Erro no servidor"}), 500
 
 
@@ -143,12 +151,14 @@ def analisa_text(file_extension, response_content):
         if ocr_text:
             lista_informacao_text = buscar_dados(
                 ocr_text, lista_informacoes_buscada, list_captura_dados)
+
             lista_corrigida = corrigir_dados(lista_informacao_text)
-            lista_analisada_e_corrigida = analisa_dados_range_referencia(
+
+            nota = analisa_dados_range_referencia(
                 lista_corrigida)
 
-        return lista_analisada_e_corrigida
+        return [lista_corrigida, nota]
 
-    except Exception as e:
-        print(f"Erro ao extrair texto do arquivo: {e}")
+    except Exception:
+        # print(f"Erro ao extrair texto do arquivo: {e}")
         return jsonify({'mensagem': "Erro no servidor"}), 500

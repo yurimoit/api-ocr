@@ -1,16 +1,17 @@
+"""Module providing a function printing python version."""
 import os
 from dotenv import load_dotenv
 import requests
 from b2sdk.transfer.outbound.upload_source import AbstractUploadSource
 from b2sdk.v1 import B2Api
-from io import BytesIO
 from flask import Flask, jsonify, request
 import flask_cors
 from controladorArquivo.controlador_arquivos import analisa_text
-from func_banco_dados import get_banco, inserir_exame_no_banco_dados, atualiza_exame_no_banco_dados, deletar_exame_banco_dados, buscar_exames, get_banco_exames
-from controladoresUuario.controlador_usuario import cadastrar_usuario, login_usuario, atualizar_usuario
 from autorization import verificar_autenticacao
-
+from controladoresUuario.controlador_usuario import cadastrar_usuario, login_usuario, atualizar_usuario
+from contraloador_paciente.controlador import cadastrar_paciente, atualizar_paciente, get_pacientes, excluir_paciente, obter_paciente, buscar_filtro_pacientes, consultar_endereco_por_cep
+from func_banco_dados import get_banco, inserir_exame_no_banco_dados, atualiza_exame_no_banco_dados, deletar_exame_banco_dados, buscar_exames, get_banco_exames
+from io import BytesIO
 
 app = Flask(__name__)
 flask_cors.CORS(app)
@@ -36,6 +37,7 @@ DATA_BASE = os.environ.get('database')
 USER = os.environ.get('user')
 PASSWORD = os.environ.get('password')
 
+PORT = os.getenv('port')
 
 
 # Criar uma instância do B2Api
@@ -46,11 +48,13 @@ bucket = b2_api.get_bucket_by_name(NAME)
 
 
 def allowed_file(filename):
+    """ALLOWED"""
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 @app.route('/', methods=['GET'])
 def get_data():
+    """Verificar api backend"""
     data = {
         'message': 'Olá, esta é uma resposta da API!',
         'status': 'success'
@@ -59,6 +63,8 @@ def get_data():
 
 
 class BytesIOUploadSource(AbstractUploadSource):
+    """Class representing a person"""
+
     def __init__(self, file_buffer):
         self.file_buffer = file_buffer
 
@@ -75,6 +81,7 @@ class BytesIOUploadSource(AbstractUploadSource):
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
+    """DEF ----"""
     try:
         if 'file' in request.files:
             file_data = request.files['file']
@@ -97,8 +104,8 @@ def upload_file():
 
             return jsonify({"file_enviado": file_info_serializable, "path": original_name})
 
-    except Exception as e:
-        return jsonify({'mensagem': "Erro no servidor", 'erro': str(e)}), 500
+    except Exception:
+        return jsonify({'mensagem': "Erro no servidor"}), 500
 
 
 @app.route('/getLeitura', methods=['GET'])
@@ -123,19 +130,19 @@ def get_string():
         resposta = {
             'nome_exame': app.config['NOME_IMAGEM'],
             'url_exame': f"https://f005.backblazeb2.com/file/TesteExameSangueOcr/{app.config['NOME_IMAGEM']}",
-            'lista_dados': lista_analisada_e_corrigida,
-            'observacao': ''
+            'lista_dados': lista_analisada_e_corrigida[0],
+            'observacao': lista_analisada_e_corrigida[1]
         }
 
         return jsonify(resposta), 200
 
-    except Exception as e:
-        print(f'Erro na funcao: {e}')
-        return str(e), 500
+    except Exception:
+        return jsonify({'mensagem': "Erro no servidor"}), 500
 
 
 @app.route('/listaFiles', methods=['GET'])
 def getLista():
+    """Get lista"""
     try:
         # Listar os objetos no bucket
         file_versions = bucket.ls()
@@ -145,8 +152,8 @@ def getLista():
             f'https://f005.backblazeb2.com/file/TesteExameSangueOcr/{file_version_tuple[0].file_name}' for file_version_tuple in file_versions]
 
         return jsonify({"file_names_url": file_names})
-    except Exception as e:
-        return jsonify({'mensagem': "Erro no servidor", 'erro': str(e)}), 500
+    except Exception:
+        return jsonify({'mensagem': "Erro no servidor"}), 500
 
 
 @app.route('/cadastrarUsuario', methods=['POST'])
@@ -159,8 +166,6 @@ def cadastra_usuario_route():
 def rota_login_usuario():
     """PERMITI ACESSO USUARIO"""
 
-    print('Entrou na rota login')
-
     return login_usuario()
 
 
@@ -168,9 +173,6 @@ def rota_login_usuario():
 @verificar_autenticacao
 def rota_atualizar_usuario():
     """PERMITI ATUALIZAÇÃO DO USÚARIO"""
-
-    print('Entrou na rota atualiza usuario')
-
     return atualizar_usuario()
 
 
@@ -197,8 +199,8 @@ def post_atualiza_dados_route(id):
 
 @app.route('/deletar/exame/<int:id>', methods=['DELETE'])
 @verificar_autenticacao
-def post_deletar_dados_route(id):
-    """Salva dados no banco"""
+def deletar_dados_route(id):
+    """DELETAR EXAME DO BANCO"""
     return deletar_exame_banco_dados(id)
 
 
@@ -223,5 +225,53 @@ def get_banco_exame_route():
     return get_banco_exames()
 
 
+@app.route('/buscarcep', methods=['GET'])
+def get_buscar_cep():
+    """Fazer um get dos dados cep"""
+    return consultar_endereco_por_cep()
+
+
+@app.route('/cadastrar/paciente', methods=['POST'])
+@verificar_autenticacao
+def rota_cadastrar_paciente():
+    """CADASTRAR PACIENTE"""
+    return cadastrar_paciente()
+
+
+@app.route('/buscar/pacientes', methods=['GET'])
+@verificar_autenticacao
+def rota_buscar_pacientes():
+    """BUSCAR PACIENTE"""
+    return get_pacientes()
+
+
+@app.route('/obter/paciente', methods=['GET'])
+@verificar_autenticacao
+def rota_obter_paciente():
+    """OBTER PACIENTE"""
+    return obter_paciente()
+
+
+@app.route('/buscarFiltro/pacientes', methods=['GET'])
+@verificar_autenticacao
+def rota_filtro_buscar_pacientes():
+    """BUSCAR POR FILTRO PACIENTES"""
+    return buscar_filtro_pacientes()
+
+
+@app.route('/atualizar/paciente', methods=['PUT'])
+@verificar_autenticacao
+def rota_atualizar_paciente():
+    """ATUALIZAR PACIENTE"""
+    return atualizar_paciente()
+
+
+@app.route('/deletar/paciente/<int:id>', methods=['DELETE'])
+@verificar_autenticacao
+def deletar_dados_paciente_route(id):
+    """DELETAR PACIENTE DO BANCO"""
+    return excluir_paciente(id)
+
+
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=int(PORT))

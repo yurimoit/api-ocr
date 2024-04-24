@@ -1,29 +1,13 @@
 import jwt
 import os
-import psycopg2
 from flask import request, jsonify
 from dotenv import load_dotenv
 from functools import wraps
-
+from conexao_banco_dados import connectar_banco
 
 load_dotenv()
 
 SENHA_JWT = os.environ.get('senhaJWT')
-
-
-def connectar_banco():
-    """CONNECTA COM BANCO DE DADOS"""
-
-    load_dotenv()
-
-    conn = psycopg2.connect(
-        host=os.environ.get('host'),
-        database=os.environ.get('database'),
-        user=os.environ.get('user'),
-        password=os.environ.get('password')
-    )
-
-    return conn
 
 
 def verificar_autenticacao(next):
@@ -32,7 +16,6 @@ def verificar_autenticacao(next):
     @wraps(next)
     def verificar_usuario(*args, **kwargs):
         """VERIFICAR AUTENTICACAO DO USUARIO"""
-
 
         authorization = request.headers.get('Authorization')
         if not authorization:
@@ -44,19 +27,16 @@ def verificar_autenticacao(next):
         conn = None
 
         try:
-            # print("aqui....")
-            # print(SENHA_JWT)
-            # print(jwt.decode(token, SENHA_JWT, algorithms=['HS256']))
             id = jwt.decode(token, SENHA_JWT, algorithms=['HS256'])['id']
 
-
             # Conectando ao banco de dados
-            cursor = connectar_banco().cursor()
+            conn = connectar_banco()
+            cursor = conn.cursor()
 
             # Inserindo o usuário no banco de dados
             cursor.execute("select * from usuarios where id=%s", (id,))
             resultado = cursor.fetchone()
-            connectar_banco().commit()
+            conn.commit()
             # print("Resultado: ", resultado)
 
             if not resultado:

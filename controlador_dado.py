@@ -3,7 +3,6 @@ import re
 import copy
 from difflib import SequenceMatcher
 from flask import jsonify
-import os
 
 
 def buscar_dados(texto_gerado, lista, list_captura_dados):
@@ -61,7 +60,7 @@ def buscar_dados(texto_gerado, lista, list_captura_dados):
                         if item and not item.isalpha():
                             numero_dado.append(item.strip())
 
-                    # print(numero_dado)
+                    # print(nova_palavra, numero_dado)
 
                 else:
                     continue
@@ -91,6 +90,7 @@ def buscar_dados(texto_gerado, lista, list_captura_dados):
 
                     for item in lista_dados_finais:
                         if palavra_padrao == item['nome']:
+                            # print("Entrou ", palavra_padrao, numero_dado)
                             if isinstance(numero_dado, list):
                                 item['nome'] = palavra_padrao
 
@@ -107,23 +107,49 @@ def buscar_dados(texto_gerado, lista, list_captura_dados):
                                     item['valorPR'] = item['valorPR'][0:(
                                         len(item['valorPR'])-5)]
 
-                                padrao = re.compile(r'\d{1}[a-zA-Z]\d{1}')
-                                if padrao.search(numero_dado[1]):
-                                    # print('Foi aqui', numero_dado[1])
-                                    separa_valores_referencia = numero_dado[1].split(
-                                        'a')
-                                    if len(separa_valores_referencia) > 1:
-                                        item['valoRA'] = remover_caracteres(
-                                            separa_valores_referencia[0])
+                                # print(item['valorPR'])
+
+                                if len(numero_dado) == 3:
+                                    padrao_ed = re.compile(r'^[a-zA-Z]\d{3}$')
+                                    if padrao_ed.search(numero_dado[2]):
+                                        # print('Foi aqui', numero_dado[2])
+
+                                        item['valoRA'] = '0.0'
                                         item['valorB'] = remover_caracteres(
-                                            separa_valores_referencia[1])
-                                    break
+                                            numero_dado[2])
+                                        break
 
-                                if item['mm3'] == '--':
-                                    item['mm3'] = remover_caracteres(
-                                        numero_dado[1])
+                                if len(numero_dado) == 2:
+                                    padrao = re.compile(r'\d{1}[a-zA-Z]\d{1}')
+                                    if padrao.search(numero_dado[1]):
+                                        # print('Foi aqui', numero_dado[1])
+                                        separa_valores_referencia = numero_dado[1].split(
+                                            'a')
+                                        if len(separa_valores_referencia) > 1:
+                                            item['valoRA'] = remover_caracteres(
+                                                separa_valores_referencia[0])
+                                            item['valorB'] = remover_caracteres(
+                                                separa_valores_referencia[1])
+                                        break
 
-                                if len(numero_dado) > 2:
+                                if len(numero_dado) >= 3 and palavra_padrao not in ('hemacias', 'hemoglobina', 'hematocrito', 'vcm', 'hcm', 'chcm', 'rdw', 'leucocitos - global'):
+                                    if item['mm3'] == '--':
+                                        item['mm3'] = remover_caracteres(
+                                            numero_dado[1])
+
+                                if len(numero_dado) > 1 and palavra_padrao in ('hemacias', 'hemoglobina', 'hematocrito', 'vcm', 'hcm', 'chcm', 'rdw', 'leucocitos - global'):
+                                    padrao = re.compile(r'\d{1}[a-zA-Z]\d{1}')
+                                    if padrao.search(numero_dado[1]):
+                                        separa_valores_referencia = numero_dado[1].split(
+                                            'a')
+                                        if len(separa_valores_referencia) > 1:
+                                            item['valoRA'] = remover_caracteres(
+                                                separa_valores_referencia[0])
+                                            item['valorB'] = remover_caracteres(
+                                                separa_valores_referencia[1])
+
+                                if len(numero_dado) > 2 and palavra_padrao not in ('hemacias', 'hemoglobina', 'hematocrito', 'vcm', 'hcm', 'chcm', 'rdw', 'leucocitos - global'):
+                                    padrao = re.compile(r'\d{1}[a-zA-Z]\d{1}')
                                     if padrao.search(numero_dado[2]):
                                         separa_valores_referencia = numero_dado[2].split(
                                             'a')
@@ -140,7 +166,8 @@ def buscar_dados(texto_gerado, lista, list_captura_dados):
                     break
         # print(*lista_dados_finais, sep='\n')
         return lista_dados_finais
-    except TypeError:
+    except Exception as e:
+        print(f"Erro no controlador de dado: {e}")
         return jsonify({'mensagem': "Erro no servidor"}), 500
 
 
@@ -154,8 +181,6 @@ def corrigir_dados(lista_dados):
                 if '.' in (dicionario[chave]):
                     separador = (dicionario[chave]).split('.')
 
-                    print(separador)
-
                     if (dicionario['nome'] == 'hemacias') and (len(dicionario[chave]) >= 4):
                         lista_palavra_hemacias = list(
                             (dicionario[chave]).replace('.', ''))
@@ -166,7 +191,7 @@ def corrigir_dados(lista_dados):
                     padrao = re.compile(r'\d{1}[.]\d{3}[.]\d{1}')
                     if padrao.search(dicionario[chave]):
 
-                        print(dicionario[chave])
+                        # print(dicionario[chave])
 
                         dicionario[chave] = (dicionario[chave][0:(
                             len(dicionario[chave])-1)]).replace('.', '')
@@ -211,13 +236,17 @@ def corrigir_dados(lista_dados):
                         '.', '') + dicionario[chave][len(dicionario[chave])-1]
 
         return lista_dados
-    except TypeError:
+    except Exception:
+        # print(f"Erro ao corrigir o dado: {e}")
         return jsonify({'mensagem': "Erro no servidor"}), 500
 
 
 def analisa_dados_range_referencia(lista_dados):
+    """"""
 
     try:
+        lista_dados_fora_referencia = []
+
         for dicionario in lista_dados:
             referencia = 'valorPR'
             referencia_a = ''
@@ -233,10 +262,25 @@ def analisa_dados_range_referencia(lista_dados):
             referencia_valor = float(dicionario[referencia])
 
             if referencia_a <= referencia_valor <= referencia_b:
-                # print(
-                #     f'{dicionario["nome"]} esta dentro da referencia: valor: {referencia_valor}')
+
                 continue
 
-        return lista_dados
+            if referencia_valor < referencia_a:
+                lista_dados_fora_referencia.append(
+                    f'{(dicionario["nome"]).upper()} ------- Está fora dos valores de referência.\n DADO: {referencia_valor} esta ABAIXO do valor de referência.\n'
+                    f'  ---- Referência ----- {referencia_a} ATÉ {referencia_b} ------\n')
+
+                continue
+
+            if referencia_valor > referencia_b:
+                lista_dados_fora_referencia.append(
+                    f'{(dicionario["nome"]).upper()} ------- Está fora dos valores de referência.\n DADO: {referencia_valor} esta ACIMA do valor de referência.\n'
+                    f'  ---- Referência ----- {referencia_a} ATÉ {referencia_b} ------\n')
+
+                continue
+
+        texto_analizado = '\n'.join(lista_dados_fora_referencia)
+
+        return texto_analizado
     except TypeError:
         return jsonify({'mensagem': "Erro no servidor"}), 500
