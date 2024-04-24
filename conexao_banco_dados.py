@@ -5,9 +5,8 @@ import psycopg2
 load_dotenv()
 
 
-def connectar_banco():
-    """CONNECTA COM BANCO DE DADOS"""
-
+def conectar_banco():
+    """Conecta com o banco de dados"""
     conn = psycopg2.connect(
         host=os.getenv('host'),
         database=os.getenv('database'),
