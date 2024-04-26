@@ -38,13 +38,13 @@ def buscar_dados(texto_gerado, lista, list_captura_dados):
         nova_palavra: str = ''
 
         print("TEXTO GERADO: ", texto_gerado)
-        print("TAMANHO TEXTO GERADO: ", texto_gerado[0].data)
+        print("TAMANHO TEXTO GERADO: ", len(texto_gerado))
 
         # textos_lines = texto_gerado
 
         if isinstance(texto_gerado, tuple):
             texto_gerado = list(texto_gerado)
-            texto_gerado = texto_gerado[0].data
+            texto_gerado = texto_gerado[0]
 
         textos_lines = texto_gerado.splitlines()
 
