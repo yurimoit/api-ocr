@@ -42,7 +42,7 @@ def buscar_dados(texto_gerado, lista, list_captura_dados):
         if isinstance(texto_gerado, tuple):
             texto_gerado = texto_gerado[0]
 
-        textos_lines = texto_gerado.splitlines()
+        textos_lines = str(texto_gerado).splitlines()
 
         lista_de_referencia = ["/mm3", '/mm', 'g/dl', '%', 'fl',
                                'pg', 'u3', 'g3', '&', 'de', "‘", "`", 't', 'u³', '/mm³', 'milhões/mm³', '£1', '£2']
@@ -174,7 +174,7 @@ def buscar_dados(texto_gerado, lista, list_captura_dados):
         return lista_dados_finais
     except Exception as e:
         print(
-            f"Erro no controlador de dado: {e} E texto gerado {texto_gerado}")
+            f"Erro no controlador de dado: {e}")
         return jsonify({'mensagem': "Erro no servidor"}), 500
 
 
