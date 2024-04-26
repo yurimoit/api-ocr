@@ -178,7 +178,8 @@ def buscar_dados(texto_gerado, lista, list_captura_dados):
     except Exception as e:
         print(
             f"Erro no controlador de dado: {e}")
-        return jsonify({'mensagem': "Erro no servidor"}), 500
+        return jsonify({'mensagem': "Erro no servidor",
+                        "TEXTO": len(texto_gerado)}), 500
 
 
 def corrigir_dados(lista_dados):
