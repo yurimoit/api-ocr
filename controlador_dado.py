@@ -31,11 +31,17 @@ def buscar_dados(texto_gerado, lista, list_captura_dados):
             return re.sub(r'[^a-zA-Z0-9.,]', '', texto)
 
         def remover_caracteres(texto):
-            # Use expressões regulares para substituir todos os caracteres não desejados
+            """Use expressões regulares para substituir todos os caracteres não desejados"""
             texto_limpo = re.sub(r'[^\d.,]', '', texto)
             return texto_limpo
 
         nova_palavra: str = ''
+
+        print("TEXTO GERADO: ", texto_gerado)
+
+        if isinstance(texto_gerado, tuple):
+            texto_gerado = texto_gerado[0]
+
         textos_lines = texto_gerado.splitlines()
 
         lista_de_referencia = ["/mm3", '/mm', 'g/dl', '%', 'fl',
