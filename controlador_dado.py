@@ -38,14 +38,14 @@ def buscar_dados(texto_gerado, lista, list_captura_dados):
         nova_palavra: str = ''
 
         print("TEXTO GERADO: ", type(texto_gerado))
-        print("TAMANHO TEXTO GERADO: ", len(texto_gerado))
+        print("TAMANHO TEXTO GERADO: ", texto_gerado[1])
 
-        textos_lines = texto_gerado
+        # textos_lines = texto_gerado
 
-        # if isinstance(texto_gerado, tuple):
-        #     texto_gerado = texto_gerado[0]
+        if isinstance(texto_gerado, tuple):
+            texto_gerado = texto_gerado[1]
 
-        # textos_lines = texto_gerado.splitlines()
+        textos_lines = texto_gerado.splitlines()
 
         lista_de_referencia = ["/mm3", '/mm', 'g/dl', '%', 'fl',
                                'pg', 'u3', 'g3', '&', 'de', "‘", "`", 't', 'u³', '/mm³', 'milhões/mm³', '£1', '£2']
