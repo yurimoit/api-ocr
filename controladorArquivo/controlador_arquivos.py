@@ -40,7 +40,7 @@ def ocr_image_to_text(image):
 
         text = pytesseract.image_to_string(image_enhanced)
         return text
-    except Exception:
+    except Exception as e:
         print(f"Erro ao extrair texto do arquivo: {e}")
         return jsonify({'mensagem': "Erro no servidor ocr file image"}), 500
     finally:
