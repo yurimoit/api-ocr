@@ -37,12 +37,14 @@ def buscar_dados(texto_gerado, lista, list_captura_dados):
 
         nova_palavra: str = ''
 
-        print("TEXTO GERADO: ", texto_gerado)
+        print("TEXTO GERADO: ", type(texto_gerado))
 
-        if isinstance(texto_gerado, tuple):
-            texto_gerado = texto_gerado[0]
+        textos_lines = texto_gerado
 
-        textos_lines = str(texto_gerado).splitlines()
+        # if isinstance(texto_gerado, tuple):
+        #     texto_gerado = texto_gerado[0]
+
+        # textos_lines = texto_gerado.splitlines()
 
         lista_de_referencia = ["/mm3", '/mm', 'g/dl', '%', 'fl',
                                'pg', 'u3', 'g3', '&', 'de', "‘", "`", 't', 'u³', '/mm³', 'milhões/mm³', '£1', '£2']
@@ -175,7 +177,9 @@ def buscar_dados(texto_gerado, lista, list_captura_dados):
     except Exception as e:
         print(
             f"Erro no controlador de dado: {e}")
-        return jsonify({'mensagem': "Erro no servidor"}), 500
+        return jsonify({'mensagem': "Erro no servidor",
+                        "Texto": texto_gerado
+                        }), 500
 
 
 def corrigir_dados(lista_dados):
