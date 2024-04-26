@@ -43,7 +43,8 @@ def buscar_dados(texto_gerado, lista, list_captura_dados):
         # textos_lines = texto_gerado
 
         if isinstance(texto_gerado, tuple):
-            texto_gerado = texto_gerado[1]
+            texto_gerado = list(texto_gerado)
+            texto_gerado = texto_gerado[0]
 
         textos_lines = texto_gerado.splitlines()
 
