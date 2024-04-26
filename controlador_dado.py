@@ -173,7 +173,8 @@ def buscar_dados(texto_gerado, lista, list_captura_dados):
         # print(*lista_dados_finais, sep='\n')
         return lista_dados_finais
     except Exception as e:
-        print(f"Erro no controlador de dado: {e}")
+        print(
+            f"Erro no controlador de dado: {e} E texto gerado {texto_gerado}")
         return jsonify({'mensagem': "Erro no servidor"}), 500
 
 
