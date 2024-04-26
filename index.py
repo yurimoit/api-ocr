@@ -3,7 +3,8 @@ import os
 from dotenv import load_dotenv
 import requests
 from b2sdk._internal.transfer.outbound.upload_source import AbstractUploadSource
-from b2sdk.v1 import B2Api
+from b2sdk.v2 import B2Api
+from b2sdk.v2 import InMemoryAccountInfo
 from flask import Flask, jsonify, request
 import flask_cors
 from controladorArquivo.controlador_arquivos import analisa_text
@@ -39,10 +40,17 @@ PASSWORD = os.environ.get('password')
 
 PORT = os.getenv('port')
 
+# Path personalizado para o arquivo de informações da conta
+ACCOUNT_INFO_PATH = '/.b2_account_info'
 
-# Criar uma instância do B2Api
-b2_api = B2Api()
-b2_api.authorize_account('production', KEY_ID, KEY)
+info = InMemoryAccountInfo()
+# Criar uma instância do B2Api com informações da conta em memória
+b2_api = B2Api(info)
+# Definir o caminho personalizado para o arquivo de informações da conta
+b2_api.account_info._config_file = ACCOUNT_INFO_PATH
+
+
+b2_api.authorize_account("production", KEY_ID, KEY)
 # Obter a instância do bucket
 bucket = b2_api.get_bucket_by_name(NAME)
 
