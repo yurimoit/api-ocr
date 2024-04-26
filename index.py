@@ -2,7 +2,7 @@
 import os
 from dotenv import load_dotenv
 import requests
-from b2sdk.transfer.outbound.upload_source import AbstractUploadSource
+from b2sdk._internal.transfer.outbound.upload_source import AbstractUploadSource
 from b2sdk.v1 import B2Api
 from flask import Flask, jsonify, request
 import flask_cors
