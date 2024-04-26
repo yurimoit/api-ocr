@@ -37,8 +37,8 @@ def buscar_dados(texto_gerado, lista, list_captura_dados):
 
         nova_palavra: str = ''
 
-        print("TEXTO GERADO: ", type(texto_gerado))
-        print("TAMANHO TEXTO GERADO: ", texto_gerado[1])
+        print("TEXTO GERADO: ", texto_gerado)
+        print("TAMANHO TEXTO GERADO: ", texto_gerado[0])
 
         # textos_lines = texto_gerado
 
