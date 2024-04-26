@@ -1,12 +1,15 @@
-from dotenv import load_dotenv
+"""Bibliotecas"""
+
 import os
 import psycopg2
+from dotenv import load_dotenv
 
 load_dotenv()
 
 
-def conectar_banco():
+def connectar_banco():
     """Conecta com o banco de dados"""
+
     conn = psycopg2.connect(
         host=os.getenv('host'),
         database=os.getenv('database'),

@@ -1,13 +1,12 @@
-import jwt
+""" LIBS """
 import os
-from flask import request, jsonify
-from dotenv import load_dotenv
+import jwt
 from functools import wraps
+from flask import request, jsonify
 from conexao_banco_dados import connectar_banco
 
-load_dotenv()
 
-SENHA_JWT = os.environ.get('senhaJWT')
+SENHA_JWT = os.getenv('senhaJWT')
 
 
 def verificar_autenticacao(next):
