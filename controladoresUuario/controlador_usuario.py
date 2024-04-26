@@ -9,7 +9,7 @@ from validate_docbr import CPF
 
 
 SENHA_JWT = os.environ.get('senhaJWT')
-SENHA_JWT_DT = os.getenv('senhaJWT_Doutor')
+SENHA_JWT_DT = os.getenv('senhaJWTDoutor')
 
 
 def cadastrar_usuario():
@@ -70,14 +70,15 @@ def login_usuario():
     email = request.json.get('email')
     senha = request.json.get('senha')
 
-    # print("Aqui: ", email, senha)
+    # print("Aqui: ", email, type(senha))
 
     cursor = None
     conn = None
 
     try:
         # Conectando ao banco de dados
-        cursor = connectar_banco().cursor()
+        conn = connectar_banco()
+        cursor = conn.cursor()
 
         cursor.execute(
             "select * from usuarios where email=%s", (email,))
@@ -109,15 +110,15 @@ def login_usuario():
 
         return jsonify({'usuario': {'id': usuario[0], 'nome': usuario[1], 'email': usuario[2], 'verificacao': usuario[4]}, 'token': token, 'tokenn': tokenn}), 200
 
-    except Exception:
-        # print("Erro ao tentar fazer o Login usuário:", e)
+    except Exception as e:
+        print("Erro ao tentar fazer o Login usuário:", e)
         return jsonify({'error': 'Erro no servidor'}), 500
 
     finally:
         if cursor:
             cursor.close()
         if conn:
-            connectar_banco().close()
+            conn.close()
 
 
 def atualizar_usuario():

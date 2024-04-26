@@ -68,14 +68,14 @@ def cadastrar_paciente():
                         paciente['cidade'], paciente['estado'], paciente['id_usuario']
                         ))
 
-        id_inserido = cursor.lastrowid
-        print(id_inserido)
+        # id_inserido = cursor.lastrowid
+        # print(id_inserido)
 
         conn_conecta.commit()
 
         return jsonify({'mensagem': 'Paciente cadastrado'}), 201
 
-    except Exception as e:
+    except Exception:
         # print("Erro ao cadastrar usuário:", e)
         return jsonify({'error': 'Erro no servidor'}), 500
     finally:
@@ -154,7 +154,7 @@ def atualizar_paciente():
 
         return jsonify({'mensagem': 'Paciente atualizado'}), 201
 
-    except Exception as e:
+    except Exception:
         # print("Erro ao cadastrar usuário:", e)
         return jsonify({'mensagem': 'Erro no servidor'}), 500
     finally:
@@ -185,8 +185,8 @@ def excluir_paciente(id):
 
         return jsonify({"mensagem": "Paciente deletado com sucesso.", "id": id_paciente}), 200
 
-    except Exception as e:
-        print("Deleta paciente:", e)
+    except Exception:
+        # print("Deleta paciente:", e)
         return jsonify({'mensagem': 'Erro no servidor'}), 500
     finally:
         if cursor:
@@ -236,8 +236,8 @@ def get_pacientes():
 
         return jsonify(lista_objeto), 200
 
-    except Exception as e:
-        print("Erro ao cadastrar usuário:", e)
+    except Exception:
+        # print("Erro ao cadastrar usuário:", e)
         return jsonify({'mensagem': 'Erro no servidor'}), 500
     finally:
         if cursor:
@@ -275,8 +275,6 @@ def obter_paciente():
         lista_objeto = []
         lista_revertida = list(paciente)
 
-        print("PCIENTE", lista_revertida)
-
         lista_objeto.append({
             "id": lista_revertida[0],
             "nome": lista_revertida[1],
@@ -296,8 +294,8 @@ def obter_paciente():
 
         return jsonify(lista_objeto), 200
 
-    except Exception as e:
-        print("Erro ao buscar o paciente:", e)
+    except Exception:
+        # print("Erro ao buscar o paciente:", e)
         return jsonify({'mensagem': 'Erro no servidor'}), 500
     finally:
         if cursor:
