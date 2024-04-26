@@ -38,6 +38,7 @@ def buscar_dados(texto_gerado, lista, list_captura_dados):
         nova_palavra: str = ''
 
         print("TEXTO GERADO: ", type(texto_gerado))
+        print("TAMANHO TEXTO GERADO: ", len(texto_gerado))
 
         textos_lines = texto_gerado
 
@@ -177,9 +178,7 @@ def buscar_dados(texto_gerado, lista, list_captura_dados):
     except Exception as e:
         print(
             f"Erro no controlador de dado: {e}")
-        return jsonify({'mensagem': "Erro no servidor",
-                        "Texto": texto_gerado
-                        }), 500
+        return jsonify({'mensagem': "Erro no servidor"}), 500
 
 
 def corrigir_dados(lista_dados):
