@@ -2,7 +2,7 @@
 import os
 from dotenv import load_dotenv
 import requests
-from b2sdk.transfer.outbound.upload_source import AbstractUploadSource
+# from b2sdk.transfer.outbound.upload_source import AbstractUploadSource
 from b2sdk.v1 import B2Api
 from flask import Flask, jsonify, request
 import flask_cors
@@ -62,21 +62,50 @@ def get_data():
     return jsonify(data)
 
 
-class BytesIOUploadSource(AbstractUploadSource):
-    """Class representing a person"""
+# class BytesIOUploadSource(AbstractUploadSource):
+#     """Class representing a person"""
 
-    def __init__(self, file_buffer):
-        self.file_buffer = file_buffer
+#     def __init__(self, file_buffer):
+#         self.file_buffer = file_buffer
 
-    def get_content_length(self):
-        return len(self.file_buffer.getvalue())
+#     def get_content_length(self):
+#         return len(self.file_buffer.getvalue())
 
-    def get_content_sha1(self):
-        # Implemente a lógica para calcular o SHA1 do conteúdo
-        pass
+#     def get_content_sha1(self):
+#         # Implemente a lógica para calcular o SHA1 do conteúdo
+#         pass
 
-    def open(self):
-        return self.file_buffer
+#     def open(self):
+#         return self.file_buffer
+
+
+# @app.route('/upload', methods=['POST'])
+# def upload_file():
+#     """DEF ----"""
+#     try:
+#         if 'file' in request.files:
+#             file_data = request.files['file']
+
+#             original_name = file_data.filename
+#             file_buffer = file_data.read()
+#             mime_type = file_data.mimetype
+
+#             app.config['NOME_IMAGEM'] = original_name
+
+#             file_buffer_io = BytesIO(file_buffer)
+#             custom_upload_source = BytesIOUploadSource(file_buffer_io)
+
+#             file_enviado = bucket.upload(
+#                 upload_source=custom_upload_source,
+#                 file_name=original_name,
+#                 content_type=mime_type
+#             )
+#             file_info_serializable = file_enviado.as_dict()["fileId"]
+
+#             return jsonify({"file_enviado": file_info_serializable, "path": original_name})
+
+    # except Exception:
+    #     return jsonify({'mensagem': "Erro no servidor"}), 500
 
 
 @app.route('/upload', methods=['POST'])
@@ -93,17 +122,15 @@ def upload_file():
             app.config['NOME_IMAGEM'] = original_name
 
             file_buffer_io = BytesIO(file_buffer)
-            custom_upload_source = BytesIOUploadSource(file_buffer_io)
 
             file_enviado = bucket.upload(
-                upload_source=custom_upload_source,
+                upload_source=file_buffer_io,
                 file_name=original_name,
                 content_type=mime_type
             )
             file_info_serializable = file_enviado.as_dict()["fileId"]
 
             return jsonify({"file_enviado": file_info_serializable, "path": original_name})
-
     except Exception:
         return jsonify({'mensagem': "Erro no servidor"}), 500
 
