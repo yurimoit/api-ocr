@@ -62,8 +62,8 @@ def ocr_pdf_to_text(pdf_path):
             text += page.extract_text()
         # print(text)
         return text
-    except Exception:
-        # print(f"Erro ao extrair texto do arquivo: {e}")
+    except Exception as e:
+        print(f"Erro ao extrair texto do arquivo: {e}")
         return jsonify({'mensagem': "Erro no servidor"}), 500
 
 

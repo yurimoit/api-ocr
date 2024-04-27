@@ -179,8 +179,7 @@ def buscar_dados(texto_gerado, lista, list_captura_dados):
     except Exception as e:
         print(
             f"Erro no controlador de dado: {e}")
-        return jsonify({'mensagem': "Erro no servidor",
-                        "TEXTO": len(texto_gerado)}), 500
+        return jsonify({'mensagem': "Erro no servidor"}), 500
 
 
 def corrigir_dados(lista_dados):
@@ -248,8 +247,8 @@ def corrigir_dados(lista_dados):
                         '.', '') + dicionario[chave][len(dicionario[chave])-1]
 
         return lista_dados
-    except Exception:
-        # print(f"Erro ao corrigir o dado: {e}")
+    except Exception as e:
+        print(f"Erro ao corrigir o dado: {e}")
         return jsonify({'mensagem': "Erro no servidor"}), 500
 
 
@@ -294,5 +293,6 @@ def analisa_dados_range_referencia(lista_dados):
         texto_analizado = '\n'.join(lista_dados_fora_referencia)
 
         return texto_analizado
-    except TypeError:
+    except Exception as e:
+        print(f"Erro no controlado de referencias: {str(e)}")
         return jsonify({'mensagem': "Erro no servidor"}), 500
