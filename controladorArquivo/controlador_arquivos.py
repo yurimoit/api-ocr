@@ -11,15 +11,6 @@ import xlrd
 from controlador_dado import buscar_dados, corrigir_dados, analisa_dados_range_referencia
 from listas.lista_exame_hemograma import list_captura_dados
 from listas.lista_exame_hemograma import lista_informacoes_buscada
-from pathlib import Path
-
-CAMINHO_OCR = Path(__file__).parent.parent / 'Executavel_ocr' / \
-    'tesseract-ocr-w64-setup-5.3.3.20231005.exe'
-
-# print("Aqui: ", CAMINHO_OCR)
-
-
-pytesseract.pytesseract.tesseract_cmd = f'{CAMINHO_OCR}'
 
 
 def ocr_image_to_text(image):
