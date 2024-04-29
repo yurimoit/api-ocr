@@ -11,6 +11,35 @@ import xlrd
 from controlador_dado import buscar_dados, corrigir_dados, analisa_dados_range_referencia
 from listas.lista_exame_hemograma import list_captura_dados
 from listas.lista_exame_hemograma import lista_informacoes_buscada
+# from google.cloud import vision
+
+
+# def detect_text(path):
+#     """Detects text in the file."""
+
+#     try:
+#         client = vision.ImageAnnotatorClient()
+
+#         with open(path, "rb") as image_file:
+#             content = image_file.read()
+
+#         image = vision.Image(content=content)
+
+#         response = client.text_detection(image=image)
+#         texts = response.text_annotations
+#         print("Texts:")
+
+#         for text in texts:
+#             print(f'\n"{text.description}"')
+
+#             vertices = [
+#                 f"({vertex.x},{vertex.y})" for vertex in text.bounding_poly.vertices
+#             ]
+
+#         print("bounds: {}".format(",".join(vertices)))
+
+#     except Exception as e:
+#         print('Erro na funcao do google: ', str(e))
 
 
 def ocr_image_to_text(image):
@@ -134,6 +163,7 @@ def analisa_text(file_extension, response_content):
         if file_extension in ('.png', '.jpg', '.jpeg'):
             image = Image.open(BytesIO(response_content))
             ocr_text = ocr_image_to_text(image)
+            # detect_text(image)
         elif file_extension == '.pdf':
             ocr_text = ocr_pdf_to_text(BytesIO(response_content))
         elif file_extension == '.txt':
