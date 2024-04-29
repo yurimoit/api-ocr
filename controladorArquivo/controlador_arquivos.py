@@ -13,6 +13,9 @@ from listas.lista_exame_hemograma import list_captura_dados
 from listas.lista_exame_hemograma import lista_informacoes_buscada
 
 
+pytesseract.pytesseract.tesseract_cmd = '/usr/bin/tesseract'
+
+
 def ocr_image_to_text(image):
     """Extração de dados com a biblioteca pytesseract"""
     try:
