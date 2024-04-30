@@ -234,6 +234,8 @@ def analisa_text(file_extension, response_content):
 
             lista_corrigida = corrigir_dados(lista_informacao_text)
 
+            print('LISTA:', lista_corrigida)
+
             nota = analisa_dados_range_referencia(
                 lista_corrigida)
 
