@@ -18,18 +18,6 @@ from google.oauth2 import service_account
 
 load_dotenv()
 
-TYPE_VALUE = os.getenv('typeValue')
-PROJECT_ID = os.getenv("projectId")
-PRIVATE_KEY_ID = os.getenv("privateKeyId")
-PRIVATE_KEY = os.getenv("privateKey")
-CLIENT_EMAIL = os.getenv("clientEmail")
-CLIENT_ID = os.getenv("clientId")
-AUTH_URI = os.getenv("authUri")
-TOKEN_URI = os.getenv("tokenUri")
-AUTH_PROVIDER_X509_CERT_URL = os.getenv("authProviderX509CertUrl")
-CLIENT_X_CERT_URL = os.getenv("clientX509CertUrl")
-UNIVERSE_DOMAIN = os.getenv("universeDomain")
-
 
 def detect_text(image, credentials_json):
     """Detects text in the file."""
@@ -76,19 +64,7 @@ def detect_text(image, credentials_json):
 
 
 # Credenciais JSON em formato de dicionário
-credentials_json = {
-    "type": TYPE_VALUE,
-    "project_id": PROJECT_ID,
-    "private_key_id": PRIVATE_KEY_ID,
-    "private_key": PRIVATE_KEY,
-    "client_email": CLIENT_EMAIL,
-    "client_id": CLIENT_ID,
-    "auth_uri": AUTH_URI,
-    "token_uri": TOKEN_URI,
-    "auth_provider_x509_cert_url": AUTH_PROVIDER_X509_CERT_URL,
-    "client_x509_cert_url": CLIENT_X_CERT_URL,
-    "universe_domain": UNIVERSE_DOMAIN
-}
+
 
 # Chamar a função com o caminho da imagem e as credenciais em formato de dicionário
 
@@ -210,6 +186,33 @@ def read_text_from_xls(file_content):
 
 def analisa_text(file_extension, response_content):
     """Analisa e extrair informacoes"""
+
+    TYPE_VALUE = os.getenv('typeValue')
+    PROJECT_ID = os.getenv('projectId')
+    PRIVATE_KEY_ID = os.getenv('privateKeyId')
+    PRIVATE_KEY = os.getenv('privateKey')
+    CLIENT_EMAIL = os.getenv('clientEmail')
+    CLIENT_ID = os.getenv('clientId')
+    AUTH_URI = os.getenv('authUri')
+    TOKEN_URI = os.getenv('tokenUri')
+    AUTH_PROVIDER_X509_CERT_URL = os.getenv('authProviderX509CertUrl')
+    CLIENT_X_CERT_URL = os.getenv('clientX509CertUrl')
+    UNIVERSE_DOMAIN = os.getenv('universeDomain')
+
+    credentials_json = {
+        "type": TYPE_VALUE,
+        "project_id": PROJECT_ID,
+        "private_key_id": PRIVATE_KEY_ID,
+        "private_key": PRIVATE_KEY,
+        "client_email": CLIENT_EMAIL,
+        "client_id": CLIENT_ID,
+        "auth_uri": AUTH_URI,
+        "token_uri": TOKEN_URI,
+        "auth_provider_x509_cert_url": AUTH_PROVIDER_X509_CERT_URL,
+        "client_x509_cert_url": CLIENT_X_CERT_URL,
+        "universe_domain": UNIVERSE_DOMAIN
+    }
+
     try:
         if file_extension in ('.png', '.jpg', '.jpeg'):
             image = Image.open(BytesIO(response_content))
