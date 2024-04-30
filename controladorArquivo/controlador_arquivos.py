@@ -239,6 +239,6 @@ def analisa_text(file_extension, response_content):
 
         return [lista_corrigida, nota]
 
-    except Exception:
-        # print(f"Erro ao extrair texto do arquivo: {e}")
+    except Exception as e:
+        print(f"Erro ao extrair texto do arquivo: {e}")
         return jsonify({'mensagem': "Erro no servidor"}), 500
