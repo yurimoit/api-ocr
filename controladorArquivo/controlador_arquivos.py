@@ -11,35 +11,86 @@ import xlrd
 from controlador_dado import buscar_dados, corrigir_dados, analisa_dados_range_referencia
 from listas.lista_exame_hemograma import list_captura_dados
 from listas.lista_exame_hemograma import lista_informacoes_buscada
-# from google.cloud import vision
+from dotenv import load_dotenv
+
+from google.cloud import vision
+from google.oauth2 import service_account
+
+load_dotenv()
+
+TYPE_VALUE = os.getenv('typeValue')
+PROJECT_ID = os.getenv("projectId")
+PRIVATE_KEY_ID = os.getenv("privateKeyId")
+PRIVATE_KEY = os.getenv("privateKey")
+CLIENT_EMAIL = os.getenv("clientEmail")
+CLIENT_ID = os.getenv("clientId")
+AUTH_URI = os.getenv("authUri")
+TOKEN_URI = os.getenv("tokenUri")
+AUTH_PROVIDER_X509_CERT_URL = os.getenv("authProviderX509CertUrl")
+CLIENT_X_CERT_URL = os.getenv("clientX509CertUrl")
+UNIVERSE_DOMAIN = os.getenv("universeDomain")
 
 
-# def detect_text(path):
-#     """Detects text in the file."""
+def detect_text(image, credentials_json):
+    """Detects text in the file."""
 
-#     try:
-#         client = vision.ImageAnnotatorClient()
+    # print(TYPE_VALUE, PRIVATE_KEY, PRIVATE_KEY_ID, PROJECT_ID, CLIENT_EMAIL, CLIENT_ID,
+    #       AUTH_URI, TOKEN_URI, AUTH_PROVIDER_X509_CERT_URL, CLIENT_X_CERT_URL, UNIVERSE_DOMAIN)
 
-#         with open(path, "rb") as image_file:
-#             content = image_file.read()
+    try:
+        # Configurar as credenciais com base nos dados fornecidos
+        credentials = service_account.Credentials.from_service_account_info(
+            credentials_json)
 
-#         image = vision.Image(content=content)
+        # Configurar o cliente com as credenciais
+        client = vision.ImageAnnotatorClient(credentials=credentials)
 
-#         response = client.text_detection(image=image)
-#         texts = response.text_annotations
-#         print("Texts:")
+        # Converter a imagem para bytes
+        with BytesIO() as output:
+            image.save(output, format='JPEG')
+            content = output.getvalue()
 
-#         for text in texts:
-#             print(f'\n"{text.description}"')
+        # Configurar a imagem para análise
+        gcp_image = vision.Image(content=content)
 
-#             vertices = [
-#                 f"({vertex.x},{vertex.y})" for vertex in text.bounding_poly.vertices
-#             ]
+        response = client.text_detection(image=gcp_image)
+        texts = response.text_annotations
+        print("Texts:")
+        text = ''
 
-#         print("bounds: {}".format(",".join(vertices)))
+        for text in texts:
+            print(f'\n"{text.description}"')
+            text = text.description
+            break
 
-#     except Exception as e:
-#         print('Erro na funcao do google: ', str(e))
+        #     vertices = [
+        #         f"({vertex.x},{vertex.y})" for vertex in text.bounding_poly.vertices
+        #     ]
+
+        # print("bounds: {}".format(",".join(vertices)))
+
+        return text
+
+    except Exception as e:
+        print('Erro na função do Google: ', str(e))
+
+
+# Credenciais JSON em formato de dicionário
+credentials_json = {
+    "type": TYPE_VALUE,
+    "project_id": PROJECT_ID,
+    "private_key_id": PRIVATE_KEY_ID,
+    "private_key": PRIVATE_KEY,
+    "client_email": CLIENT_EMAIL,
+    "client_id": CLIENT_ID,
+    "auth_uri": AUTH_URI,
+    "token_uri": TOKEN_URI,
+    "auth_provider_x509_cert_url": AUTH_PROVIDER_X509_CERT_URL,
+    "client_x509_cert_url": CLIENT_X_CERT_URL,
+    "universe_domain": UNIVERSE_DOMAIN
+}
+
+# Chamar a função com o caminho da imagem e as credenciais em formato de dicionário
 
 
 def ocr_image_to_text(image):
@@ -162,8 +213,8 @@ def analisa_text(file_extension, response_content):
     try:
         if file_extension in ('.png', '.jpg', '.jpeg'):
             image = Image.open(BytesIO(response_content))
-            ocr_text = ocr_image_to_text(image)
-            # detect_text(image)
+            # ocr_text = ocr_image_to_text(image)
+            ocr_text = detect_text(image, credentials_json)
         elif file_extension == '.pdf':
             ocr_text = ocr_pdf_to_text(BytesIO(response_content))
         elif file_extension == '.txt':
