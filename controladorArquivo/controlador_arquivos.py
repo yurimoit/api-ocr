@@ -31,11 +31,25 @@ CLIENT_X_CERT_URL = os.getenv('clientX509CertUrl')
 UNIVERSE_DOMAIN = os.getenv('universeDomain')
 
 
-def detect_text(image, credentials_json):
+def detect_text(image):
     """Detects text in the file."""
 
     print(TYPE_VALUE, PRIVATE_KEY, PRIVATE_KEY_ID, PROJECT_ID, CLIENT_EMAIL, CLIENT_ID,
           AUTH_URI, TOKEN_URI, AUTH_PROVIDER_X509_CERT_URL, CLIENT_X_CERT_URL, UNIVERSE_DOMAIN)
+
+    credentials_json = {
+        "type": TYPE_VALUE,
+        "project_id": PROJECT_ID,
+        "private_key_id": PRIVATE_KEY_ID,
+        "private_key": PRIVATE_KEY,
+        "client_email": CLIENT_EMAIL,
+        "client_id": CLIENT_ID,
+        "auth_uri": AUTH_URI,
+        "token_uri": TOKEN_URI,
+        "auth_provider_x509_cert_url": AUTH_PROVIDER_X509_CERT_URL,
+        "client_x509_cert_url": CLIENT_X_CERT_URL,
+        "universe_domain": UNIVERSE_DOMAIN
+    }
 
     try:
         # Configurar as credenciais com base nos dados fornecidos
@@ -199,25 +213,11 @@ def read_text_from_xls(file_content):
 def analisa_text(file_extension, response_content):
     """Analisa e extrair informacoes"""
 
-    credentials_json = {
-        "type": TYPE_VALUE,
-        "project_id": PROJECT_ID,
-        "private_key_id": PRIVATE_KEY_ID,
-        "private_key": PRIVATE_KEY,
-        "client_email": CLIENT_EMAIL,
-        "client_id": CLIENT_ID,
-        "auth_uri": AUTH_URI,
-        "token_uri": TOKEN_URI,
-        "auth_provider_x509_cert_url": AUTH_PROVIDER_X509_CERT_URL,
-        "client_x509_cert_url": CLIENT_X_CERT_URL,
-        "universe_domain": UNIVERSE_DOMAIN
-    }
-
     try:
         if file_extension in ('.png', '.jpg', '.jpeg'):
             image = Image.open(BytesIO(response_content))
             # ocr_text = ocr_image_to_text(image)
-            ocr_text = detect_text(image, credentials_json)
+            ocr_text = detect_text(image)
         elif file_extension == '.pdf':
             ocr_text = ocr_pdf_to_text(BytesIO(response_content))
         elif file_extension == '.txt':
