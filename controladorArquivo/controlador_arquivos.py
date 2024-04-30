@@ -18,12 +18,24 @@ from google.oauth2 import service_account
 
 load_dotenv()
 
+TYPE_VALUE = os.getenv('typeValue')
+PROJECT_ID = os.getenv('projectId')
+PRIVATE_KEY_ID = os.getenv('privateKeyId')
+PRIVATE_KEY = os.getenv('privateKey')
+CLIENT_EMAIL = os.getenv('clientEmail')
+CLIENT_ID = os.getenv('clientId')
+AUTH_URI = os.getenv('authUri')
+TOKEN_URI = os.getenv('tokenUri')
+AUTH_PROVIDER_X509_CERT_URL = os.getenv('authProviderX509CertUrl')
+CLIENT_X_CERT_URL = os.getenv('clientX509CertUrl')
+UNIVERSE_DOMAIN = os.getenv('universeDomain')
+
 
 def detect_text(image, credentials_json):
     """Detects text in the file."""
 
-    # print(TYPE_VALUE, PRIVATE_KEY, PRIVATE_KEY_ID, PROJECT_ID, CLIENT_EMAIL, CLIENT_ID,
-    #       AUTH_URI, TOKEN_URI, AUTH_PROVIDER_X509_CERT_URL, CLIENT_X_CERT_URL, UNIVERSE_DOMAIN)
+    print(TYPE_VALUE, PRIVATE_KEY, PRIVATE_KEY_ID, PROJECT_ID, CLIENT_EMAIL, CLIENT_ID,
+          AUTH_URI, TOKEN_URI, AUTH_PROVIDER_X509_CERT_URL, CLIENT_X_CERT_URL, UNIVERSE_DOMAIN)
 
     try:
         # Configurar as credenciais com base nos dados fornecidos
@@ -186,18 +198,6 @@ def read_text_from_xls(file_content):
 
 def analisa_text(file_extension, response_content):
     """Analisa e extrair informacoes"""
-
-    TYPE_VALUE = os.getenv('typeValue')
-    PROJECT_ID = os.getenv('projectId')
-    PRIVATE_KEY_ID = os.getenv('privateKeyId')
-    PRIVATE_KEY = os.getenv('privateKey')
-    CLIENT_EMAIL = os.getenv('clientEmail')
-    CLIENT_ID = os.getenv('clientId')
-    AUTH_URI = os.getenv('authUri')
-    TOKEN_URI = os.getenv('tokenUri')
-    AUTH_PROVIDER_X509_CERT_URL = os.getenv('authProviderX509CertUrl')
-    CLIENT_X_CERT_URL = os.getenv('clientX509CertUrl')
-    UNIVERSE_DOMAIN = os.getenv('universeDomain')
 
     credentials_json = {
         "type": TYPE_VALUE,
