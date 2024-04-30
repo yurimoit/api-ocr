@@ -70,11 +70,15 @@ def detect_text(image):
         response = client.text_detection(image=gcp_image)
         texts = response.text_annotations
         print("Texts:")
-        text = ''
+        text = None
 
         for text in texts:
             print(f'\n"{text.description}"')
             text = text.description
+            while text is None:
+                if text is not None:
+                    text = text.description
+                    break
             break
 
         #     vertices = [
