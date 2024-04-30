@@ -87,7 +87,7 @@ def detect_text(image):
 
     except Exception as e:
         print('Erro na função do Google: ', str(e))
-        return jsonify({'mensagem': "Erro no servidor"}), 500
+        return jsonify({'mensagem': str(e)}), 500
 
 
 # Credenciais JSON em formato de dicionário
