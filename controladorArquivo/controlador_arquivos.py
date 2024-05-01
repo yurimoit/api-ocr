@@ -56,20 +56,10 @@ def detect_text(image):
     try:
         # Configurar as credenciais com base nos dados fornecidos
         credentials = service_account.Credentials.from_service_account_info(
-            {
-                "type": str(TYPE_VALUE),
-                "project_id": str(PROJECT_ID),
-                "private_key_id": str(PRIVATE_KEY_ID),
-                "private_key": str(PRIVATE_KEY),
-                "client_email": str(CLIENT_EMAIL),
-                "client_id": str(CLIENT_ID),
-                "auth_uri": str(AUTH_URI),
-                "token_uri": str(TOKEN_URI),
-                "auth_provider_x509_cert_url": str(AUTH_PROVIDER_X509_CERT_URL),
-                "client_x509_cert_url": str(CLIENT_X_CERT_URL),
-                "universe_domain": str(UNIVERSE_DOMAIN)
-            }
+            credentials_json
         )
+
+        print("CRE_TRY: ", credentials)
 
         # Configurar o cliente com as credenciais
         client = vision.ImageAnnotatorClient(credentials=credentials)
