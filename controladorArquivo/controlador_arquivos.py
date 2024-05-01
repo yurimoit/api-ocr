@@ -34,7 +34,7 @@ UNIVERSE_DOMAIN = os.getenv('universeDomain')
 def detect_text(image):
     """Detects text in the file."""
 
-    print(TYPE_VALUE, PRIVATE_KEY, PRIVATE_KEY_ID, PROJECT_ID, CLIENT_EMAIL, CLIENT_ID,
+    print("Aqui: ", TYPE_VALUE, PRIVATE_KEY, PRIVATE_KEY_ID, PROJECT_ID, CLIENT_EMAIL, CLIENT_ID,
           AUTH_URI, TOKEN_URI, AUTH_PROVIDER_X509_CERT_URL, CLIENT_X_CERT_URL, UNIVERSE_DOMAIN)
 
     credentials_json = {
@@ -70,7 +70,7 @@ def detect_text(image):
         response = client.text_detection(image=gcp_image)
         texts = response.text_annotations
         print("Texts:")
-        text = None
+        text = ''
 
         for text in texts:
             print(f'\n"{text.description}"')
