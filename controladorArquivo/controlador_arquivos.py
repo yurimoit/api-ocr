@@ -51,10 +51,9 @@ def detect_text(image):
         "universe_domain": UNIVERSE_DOMAIN
     }
 
-    print("CREEE", credentials_json)
-
     try:
         # Configurar as credenciais com base nos dados fornecidos
+        print("CREEE", credentials_json)
         credentials = service_account.Credentials.from_service_account_info(
             credentials_json
         )
