@@ -51,7 +51,7 @@ def detect_text(image):
         "universe_domain": str(UNIVERSE_DOMAIN)
     }
 
-    print("CREEE", credentials)
+    print("CREEE", credentials_json)
 
     try:
         # Configurar as credenciais com base nos dados fornecidos
