@@ -75,10 +75,6 @@ def detect_text(image):
         for text in texts:
             print(f'\n"{text.description}"')
             text = text.description
-            while text is None:
-                if text is not None:
-                    text = text.description
-                    break
             break
 
         #     vertices = [
