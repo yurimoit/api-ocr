@@ -34,9 +34,6 @@ UNIVERSE_DOMAIN = os.getenv('universeDomain')
 def detect_text(image):
     """Detects text in the file."""
 
-    print("Aqui: ", TYPE_VALUE, PRIVATE_KEY, PRIVATE_KEY_ID, PROJECT_ID, CLIENT_EMAIL, CLIENT_ID,
-          AUTH_URI, TOKEN_URI, AUTH_PROVIDER_X509_CERT_URL, CLIENT_X_CERT_URL, UNIVERSE_DOMAIN)
-
     credentials_json = {
         "type": TYPE_VALUE,
         "project_id": PROJECT_ID,
@@ -53,12 +50,9 @@ def detect_text(image):
 
     try:
         # Configurar as credenciais com base nos dados fornecidos
-        print("CREEE", credentials_json)
         credentials = service_account.Credentials.from_service_account_info(
             credentials_json
         )
-
-        print("CRE_TRY: ", credentials)
 
         # Configurar o cliente com as credenciais
         client = vision.ImageAnnotatorClient(credentials=credentials)
