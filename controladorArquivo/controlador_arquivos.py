@@ -12,9 +12,9 @@ from controlador_dado import buscar_dados, corrigir_dados, analisa_dados_range_r
 from listas.lista_exame_hemograma import list_captura_dados
 from listas.lista_exame_hemograma import lista_informacoes_buscada
 from dotenv import load_dotenv
-
 from google.cloud import vision
 from google.oauth2 import service_account
+from api_ocr_texto.organizado_arquivos import retunr_lista
 
 load_dotenv()
 
@@ -57,41 +57,68 @@ def detect_text(image):
         # Configurar o cliente com as credenciais
         client = vision.ImageAnnotatorClient(credentials=credentials)
 
+        # Criar uma instância do objeto ImageEnhance
+        enhancer = ImageEnhance.Contrast(image)
+
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as temp_image:
+            image.save(temp_image.name, optimize=True,
+                       quality=100)
+
+        image_open = Image.open(temp_image.name)
+
+        # Criar uma instância do objeto ImageEnhance
+        enhancer = ImageEnhance.Contrast(image_open)
+
+        # Ajustar o contraste (valor padrão é 1.0)
+        image_contrast = enhancer.enhance(1.3)  # Aumenta o contraste em 50%
+
+        image_contrast = image_contrast.resize(
+            (1280, 720),
+            # pylint: disable=E1101
+            Image.LANCZOS)
+
+        # Criar uma instância do objeto ImageEnhance
+        enhancer_2 = ImageEnhance.Contrast(image_contrast)
+
+        # Ajustar o contraste (valor padrão é 1.0)
+        image_contrast_2 = enhancer_2.enhance(
+            1.3)  # Aumenta o contraste em 50%
+
+        image_contrast_2 = image_contrast_2.resize(
+            (1980, 1080),
+            # pylint: disable=E1101
+            Image.LANCZOS)
+
+        # Criar uma instância do objeto ImageEnhance
+        enhancer_3 = ImageEnhance.Contrast(image_contrast_2)
+
+        # Ajustar o contraste (valor padrão é 1.0)
+        image_contrast_3 = enhancer_3.enhance(
+            1.3)  # Aumenta o contraste em 50%
+
+        image_contrast_3 = image_contrast_3.resize(
+            (2560, 1440),
+            # pylint: disable=E1101
+            Image.LANCZOS)
+
         # Converter a imagem para bytes
         with BytesIO() as output:
-            image.save(output, format='JPEG')
+            image_contrast_3.save(output, format='PNG')
             content = output.getvalue()
 
         # Configurar a imagem para análise
         gcp_image = vision.Image(content=content)
 
         response = client.text_detection(image=gcp_image)
-        texts = response.text_annotations
+        print("RESPONSE: ", response.full_text_annotation.text)
+        texto = response.full_text_annotation.text
         print("Texts:")
-        text = ''
 
-        for text in texts:
-            print(f'\n"{text.description}"')
-            text = text.description
-            break
-
-        #     vertices = [
-        #         f"({vertex.x},{vertex.y})" for vertex in text.bounding_poly.vertices
-        #     ]
-
-        # print("bounds: {}".format(",".join(vertices)))
-
-        return text
+        return texto
 
     except Exception as e:
         print('Erro na função do Google: ', str(e))
         return jsonify({'mensagem': str(e)}), 500
-
-
-# Credenciais JSON em formato de dicionário
-
-
-# Chamar a função com o caminho da imagem e as credenciais em formato de dicionário
 
 
 def ocr_image_to_text(image):
@@ -107,14 +134,6 @@ def ocr_image_to_text(image):
             (image_open.width * 3, image_open.height * 3),
             # pylint: disable=E1101
             Image.LANCZOS)
-
-        # width, height = image_open.size
-        # new_width = 4000
-        # new_height = round(height*new_width/width)
-
-        # new_image = image_open.resize((new_width, new_height),
-        #                               # pylint: disable=E1101
-        #                               Image.LANCZOS)
 
         enhancer = ImageEnhance.Contrast(new_image)
         image_enhanced = enhancer.enhance(2)
@@ -132,6 +151,14 @@ def ocr_image_to_text(image):
             except Exception:
                 # print(f"Erro ao extrair texto do arquivo: {e}")
                 return jsonify({'mensagem': "Erro no servidor"}), 500
+
+# width, height = image_open.size
+        # new_width = 4000
+        # new_height = round(height*new_width/width)
+
+        # new_image = image_open.resize((new_width, new_height),
+        #                               # pylint: disable=E1101
+        #                               Image.LANCZOS)
 
 
 def ocr_pdf_to_text(pdf_path):
@@ -217,6 +244,16 @@ def analisa_text(file_extension, response_content):
             image = Image.open(BytesIO(response_content))
             # ocr_text = ocr_image_to_text(image)
             ocr_text = detect_text(image)
+
+            if ocr_text:
+
+                lista_corrigida = retunr_lista(ocr_text)
+
+                nota = analisa_dados_range_referencia(
+                    lista_corrigida)
+
+            return [lista_corrigida, nota]
+
         elif file_extension == '.pdf':
             ocr_text = ocr_pdf_to_text(BytesIO(response_content))
         elif file_extension == '.txt':
@@ -235,8 +272,6 @@ def analisa_text(file_extension, response_content):
                 ocr_text, lista_informacoes_buscada, list_captura_dados)
 
             lista_corrigida = corrigir_dados(lista_informacao_text)
-
-            print('LISTA:', lista_corrigida)
 
             nota = analisa_dados_range_referencia(
                 lista_corrigida)
