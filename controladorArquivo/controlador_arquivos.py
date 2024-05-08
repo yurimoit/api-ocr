@@ -30,35 +30,30 @@ AUTH_PROVIDER_X509_CERT_URL = os.getenv('authProviderX509CertUrl')
 CLIENT_X_CERT_URL = os.getenv('clientX509CertUrl')
 UNIVERSE_DOMAIN = os.getenv('universeDomain')
 
+credentials_json = {
+    "type": TYPE_VALUE,
+    "project_id": PROJECT_ID,
+    "private_key_id": PRIVATE_KEY_ID,
+    "private_key": PRIVATE_KEY.replace("\\n", "\n"),
+    "client_email": CLIENT_EMAIL,
+    "client_id": CLIENT_ID,
+    "auth_uri": AUTH_URI,
+    "token_uri": TOKEN_URI,
+    "auth_provider_x509_cert_url": AUTH_PROVIDER_X509_CERT_URL,
+    "client_x509_cert_url": CLIENT_X_CERT_URL,
+    "universe_domain": UNIVERSE_DOMAIN
+}
 
-def detect_text(image):
+
+def detect_text(image, credentials_json):
     """Detects text in the file."""
 
-    credentials_json = {
-        "type": TYPE_VALUE,
-        "project_id": PROJECT_ID,
-        "private_key_id": PRIVATE_KEY_ID,
-        "private_key": PRIVATE_KEY.replace("\\n", "\n"),
-        "client_email": CLIENT_EMAIL,
-        "client_id": CLIENT_ID,
-        "auth_uri": AUTH_URI,
-        "token_uri": TOKEN_URI,
-        "auth_provider_x509_cert_url": AUTH_PROVIDER_X509_CERT_URL,
-        "client_x509_cert_url": CLIENT_X_CERT_URL,
-        "universe_domain": UNIVERSE_DOMAIN
-    }
-
     try:
-        # Configurar as credenciais com base nos dados fornecidos
         credentials = service_account.Credentials.from_service_account_info(
             credentials_json
         )
 
-        # Configurar o cliente com as credenciais
         client = vision.ImageAnnotatorClient(credentials=credentials)
-
-        # Criar uma instância do objeto ImageEnhance
-        enhancer = ImageEnhance.Contrast(image)
 
         with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as temp_image:
             image.save(temp_image.name, optimize=True,
@@ -66,47 +61,39 @@ def detect_text(image):
 
         image_open = Image.open(temp_image.name)
 
-        # Criar uma instância do objeto ImageEnhance
         enhancer = ImageEnhance.Contrast(image_open)
 
-        # Ajustar o contraste (valor padrão é 1.0)
-        image_contrast = enhancer.enhance(1.3)  # Aumenta o contraste em 50%
+        image_contrast = enhancer.enhance(1.3)
 
         image_contrast = image_contrast.resize(
             (1280, 720),
             # pylint: disable=E1101
-            Image.LANCZOS)
+            Image.BICUBIC)
 
-        # Criar uma instância do objeto ImageEnhance
         enhancer_2 = ImageEnhance.Contrast(image_contrast)
 
-        # Ajustar o contraste (valor padrão é 1.0)
         image_contrast_2 = enhancer_2.enhance(
-            1.3)  # Aumenta o contraste em 50%
+            1.3)
 
         image_contrast_2 = image_contrast_2.resize(
             (1980, 1080),
             # pylint: disable=E1101
-            Image.LANCZOS)
+            Image.BICUBIC)
 
-        # Criar uma instância do objeto ImageEnhance
         enhancer_3 = ImageEnhance.Contrast(image_contrast_2)
 
-        # Ajustar o contraste (valor padrão é 1.0)
         image_contrast_3 = enhancer_3.enhance(
-            1.3)  # Aumenta o contraste em 50%
+            1.3)
 
         image_contrast_3 = image_contrast_3.resize(
             (2560, 1440),
             # pylint: disable=E1101
-            Image.LANCZOS)
+            Image.BICUBIC)
 
-        # Converter a imagem para bytes
         with BytesIO() as output:
             image_contrast_3.save(output, format='PNG')
             content = output.getvalue()
 
-        # Configurar a imagem para análise
         gcp_image = vision.Image(content=content)
 
         response = client.text_detection(image=gcp_image)
@@ -243,7 +230,7 @@ def analisa_text(file_extension, response_content):
         if file_extension in ('.png', '.jpg', '.jpeg'):
             image = Image.open(BytesIO(response_content))
             # ocr_text = ocr_image_to_text(image)
-            ocr_text = detect_text(image)
+            ocr_text = detect_text(image, credentials_json)
 
             if ocr_text:
 
