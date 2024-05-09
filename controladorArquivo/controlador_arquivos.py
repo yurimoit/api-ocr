@@ -131,12 +131,10 @@ def ocr_image_to_text(image):
         print(f"Erro ao extrair texto do arquivo: {e}")
         return jsonify({'mensagem': "Erro no servidor ocr file image"}), 500
     finally:
-        # Excluir o arquivo temporário depois de abrir a imagem
         if 'temp_image' in locals():
             try:
                 os.unlink(temp_image.name)
             except Exception:
-                # print(f"Erro ao extrair texto do arquivo: {e}")
                 return jsonify({'mensagem': "Erro no servidor"}), 500
 
 # width, height = image_open.size

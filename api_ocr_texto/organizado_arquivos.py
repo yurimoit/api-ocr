@@ -2,6 +2,7 @@
 import re
 import copy
 from difflib import SequenceMatcher
+from flask import jsonify
 
 texto_capturado = """
  Nome
@@ -136,276 +137,286 @@ def verifica_nome(dicionario, info, contador):
 def analisa_dados(dados, informacoes_buscada, list_captura_dados):
     """Separa e analisa dados"""
 
-    info = copy.copy(informacoes_buscada)
-    lista_palavras_compostas = ['leucocitos - global',
-                                'neutrofilos bastonetes', 'neutrofilos segmentados']
-    lista_dados = copy.deepcopy(list_captura_dados)
-    lista_frases = dados.lower().splitlines()
+    try:
+        info = copy.copy(informacoes_buscada)
+        lista_palavras_compostas = ['leucocitos - global',
+                                    'neutrofilos bastonetes', 'neutrofilos segmentados']
+        lista_dados = copy.deepcopy(list_captura_dados)
+        lista_frases = dados.lower().splitlines()
 
-    semelhanca_rr = 0
-    lista_referencia = []
+        semelhanca_rr = 0
+        lista_referencia = []
 
-    for i, bloco in enumerate(lista_frases):
-        lista_dados_bloco = bloco.strip().split(' ')
+        for i, bloco in enumerate(lista_frases):
+            lista_dados_bloco = bloco.strip().split(' ')
 
-        comparador = SequenceMatcher(
-            None,   'valores de referencia', (bloco).replace(":", "").replace('ê', 'e'))
-        semelhanca_rr = comparador.ratio()
-
-        if semelhanca_rr >= 0.6:
-            lista_referencia = lista_frases[lista_frases.index(
-                bloco)+1:lista_frases.index(bloco)+15]
-
-            # print(lista_referencia)
-
-        if not (1 < len(lista_dados_bloco) < 4):
-            continue
-
-        palavra_p = ''
-        verificado_palavra = False
-        semelhanca = 0
-        semelhanca_2 = 0
-
-        for palavra in lista_palavras_compostas:
             comparador = SequenceMatcher(
-                None,   palavra, (lista_dados_bloco[0]+" "+lista_dados_bloco[1]).replace(":", "").replace('á', 'a'))
-            semelhanca_2 = comparador.ratio()
+                None,   'valores de referencia', (bloco).replace(":", "").replace('ê', 'e'))
+            semelhanca_rr = comparador.ratio()
 
-            if semelhanca_2 >= 0.6:
-                palavra_p = palavra
-                verificado_palavra = True
-                break
+            if semelhanca_rr >= 0.6:
+                lista_referencia = lista_frases[lista_frases.index(
+                    bloco)+1:lista_frases.index(bloco)+15]
 
-        if semelhanca_2 < 0.6:
-            for palavra_padrao in info:
+                # print(lista_referencia)
+
+            if not (1 < len(lista_dados_bloco) < 4):
+                continue
+
+            palavra_p = ''
+            verificado_palavra = False
+            semelhanca = 0
+            semelhanca_2 = 0
+
+            for palavra in lista_palavras_compostas:
                 comparador = SequenceMatcher(
-                    None,   palavra_padrao, (lista_dados_bloco[0]).replace(":", "").replace('á', 'a'))
-                semelhanca = comparador.ratio()
+                    None,   palavra, (lista_dados_bloco[0]+" "+lista_dados_bloco[1]).replace(":", "").replace('á', 'a'))
+                semelhanca_2 = comparador.ratio()
 
-                if semelhanca >= 0.6:
-                    palavra_p = palavra_padrao
-                    info.remove(palavra_padrao)
+                if semelhanca_2 >= 0.6:
+                    palavra_p = palavra
+                    verificado_palavra = True
                     break
 
-        if semelhanca < 0.6 and semelhanca_2 < 0.6:
-            continue
+            if semelhanca_2 < 0.6:
+                for palavra_padrao in info:
+                    comparador = SequenceMatcher(
+                        None,   palavra_padrao, (lista_dados_bloco[0]).replace(":", "").replace('á', 'a'))
+                    semelhanca = comparador.ratio()
 
-        for dicionario in lista_dados:
+                    if semelhanca >= 0.6:
+                        palavra_p = palavra_padrao
+                        info.remove(palavra_padrao)
+                        break
 
-            if (dicionario['nome'] == palavra_p) and verificado_palavra:
-                if len(lista_dados_bloco) > 2:
+            if semelhanca < 0.6 and semelhanca_2 < 0.6:
+                continue
+
+            for dicionario in lista_dados:
+
+                if (dicionario['nome'] == palavra_p) and verificado_palavra:
+                    if len(lista_dados_bloco) > 2:
+                        dicionario['valorPR'] = remover_unidades(
+                            lista_dados_bloco[2])
+                        break
+                    dicionario['valorPR'] = '--'
+                    break
+
+                if dicionario['nome'] == palavra_p:
                     dicionario['valorPR'] = remover_unidades(
-                        lista_dados_bloco[2])
-                    break
-                dicionario['valorPR'] = '--'
-                break
+                        lista_dados_bloco[1])
 
-            if dicionario['nome'] == palavra_p:
-                dicionario['valorPR'] = remover_unidades(lista_dados_bloco[1])
-
-    return [lista_dados, lista_referencia]
-
-
-# analisa_dados(texto_capturado, lista_informacoes_buscada, list_captura_dados)
-# print(*analisa_dados(texto_capturado,
-#       lista_informacoes_buscada, list_captura_dados), sep='\n')
+        return [lista_dados, lista_referencia]
+    except Exception:
+        return jsonify({'mensagem': "Erro no servidor"}), 500
 
 
 def separa_dados_referencia(lista_referencia):
-    lista = copy.copy(lista_referencia)
 
-    lista_fatorada = []
+    try:
+        lista = copy.copy(lista_referencia)
 
-    for item in lista:
-        if 'ate' in item:
-            v4 = item.strip().split('a')
-            lista_fatorada.append([*v4])
-            continue
+        lista_fatorada = []
 
-        if '||' in item:
-            v1 = item.strip().split('||')
-            v2 = (v1[1]).strip().split('a')
-            lista_fatorada.append([v1[0], *v2])
-            continue
+        for item in lista:
+            if 'ate' in item:
+                v4 = item.strip().split('a')
+                lista_fatorada.append([*v4])
+                continue
 
-        v3 = item.strip().split('a')
+            if '||' in item:
+                v1 = item.strip().split('||')
+                v2 = (v1[1]).strip().split('a')
+                lista_fatorada.append([v1[0], *v2])
+                continue
 
-        if ' ' in v3[0]:
-            v5 = v3[0].split(' ')
-            lista_fatorada.append([v5[0], v5[1], v3[1]])
-            continue
+            v3 = item.strip().split('a')
 
-        lista_fatorada.append([*v3])
+            if ' ' in v3[0]:
+                v5 = v3[0].split(' ')
+                lista_fatorada.append([v5[0], v5[1], v3[1]])
+                continue
 
-    for itens in lista_fatorada:
-        for item in itens:
-            if item == '':
-                itens.remove(item)
+            lista_fatorada.append([*v3])
 
-    return lista_fatorada
+        for itens in lista_fatorada:
+            for item in itens:
+                if item == '':
+                    itens.remove(item)
+
+        return lista_fatorada
+    except Exception:
+        return jsonify({'mensagem': "Erro no servidor"}), 500
 
 
 def remover_unidades(item):
 
-    padrao = r'\b(?:/mm3|g/dl|%,|pg|£1|\|\||te|\.| ?%|fl)\b'
+    try:
+        padrao = r'\b(?:/mm3|g/dl|%,|pg|£1|\|\||te|\.| ?%|fl)\b'
 
-    itens_limpos = re.sub(padrao, '', item)
-    itens_limpos = itens_limpos.replace('||', '')
-    itens_limpos = itens_limpos.replace('%', '')
-    itens_limpos = itens_limpos.replace('£1', '')
-    itens_limpos = itens_limpos.strip()
-    itens_limpos = itens_limpos.replace(',', '.')
+        itens_limpos = re.sub(padrao, '', item)
+        itens_limpos = itens_limpos.replace('||', '')
+        itens_limpos = itens_limpos.replace('%', '')
+        itens_limpos = itens_limpos.replace('£1', '')
+        itens_limpos = itens_limpos.strip()
+        itens_limpos = itens_limpos.replace(',', '.')
 
-    return itens_limpos
+        return itens_limpos
+    except Exception:
+        return jsonify({'mensagem': "Erro no servidor"}), 500
 
 
 def classifica_dados(lista_fatorada, list_captura_dados):
     """"""
+    try:
+        lista = copy.deepcopy(lista_fatorada)
+        lista_2 = copy.deepcopy(lista_fatorada)
+        lista_dados = copy.deepcopy(list_captura_dados)
 
-    lista = copy.deepcopy(lista_fatorada)
-    lista_2 = copy.deepcopy(lista_fatorada)
-    lista_dados = copy.deepcopy(list_captura_dados)
+        for itens in lista:
+            for item in itens:
+                if '/mm3' in item:
+                    item = remover_unidades(item)
 
-    for itens in lista:
-        for item in itens:
-            if '/mm3' in item:
-                item = remover_unidades(item)
-
-                # Hemacias------------------------------------------
-                if len(item) > 7 and float(item) > 3000000:
-                    itens[0] = remover_unidades(itens[0])
-                    lista_dados[0]['valoRA'] = str(float(itens[0])/10**6)
-                    lista_dados[0]['valorB'] = str(float(item)/10**6)
-                    break
-
-                if 3.8 <= float(item) <= 6.5:
-                    itens[0] = remover_unidades(itens[0])
-                    lista_dados[0]['valoRA'] = str(float(itens[0])/10**6)
-                    lista_dados[0]['valorB'] = str(float(item)/10**6)
-                    break
-
-                # Leuocitos Global---------------------------------
-
-                if 10000 <= float(item) <= 15000:
-                    if len(itens) > 2:
+                    # Hemacias------------------------------------------
+                    if len(item) > 7 and float(item) > 3000000:
                         itens[0] = remover_unidades(itens[0])
+                        lista_dados[0]['valoRA'] = str(float(itens[0])/10**6)
+                        lista_dados[0]['valorB'] = str(float(item)/10**6)
+                        break
+
+                    if 3.8 <= float(item) <= 6.5:
+                        itens[0] = remover_unidades(itens[0])
+                        lista_dados[0]['valoRA'] = str(float(itens[0])/10**6)
+                        lista_dados[0]['valorB'] = str(float(item)/10**6)
+                        break
+
+                    # Leuocitos Global---------------------------------
+
+                    if 10000 <= float(item) <= 15000:
+                        if len(itens) > 2:
+                            itens[0] = remover_unidades(itens[0])
+                            itens[1] = remover_unidades(itens[1])
+                            lista_dados[7]['valorPR'] = itens[0]
+                            lista_dados[7]['valoRA'] = itens[1]
+                            lista_dados[7]['valorB'] = item
+                        else:
+                            itens[0] = remover_unidades(itens[0])
+                            lista_dados[7]['valoRA'] = itens[0]
+                            lista_dados[7]['valorB'] = item
+
+                        break
+
+                    # Neutrofilos bastonetes-----------------------------
+                    if float(item) == 0:
                         itens[1] = remover_unidades(itens[1])
-                        lista_dados[7]['valorPR'] = itens[0]
-                        lista_dados[7]['valoRA'] = itens[1]
-                        lista_dados[7]['valorB'] = item
-                    else:
-                        itens[0] = remover_unidades(itens[0])
-                        lista_dados[7]['valoRA'] = itens[0]
-                        lista_dados[7]['valorB'] = item
+                        lista_dados[8]['valoRA'] = item
+                        lista_dados[8]['valorB'] = itens[1]
+                        break
 
-                    break
+                    # Neutrofilos Segmentados-----------------------------
+                    if 4000 <= float(item) <= 7000:
 
-                # Neutrofilos bastonetes-----------------------------
-                if float(item) == 0:
-                    itens[1] = remover_unidades(itens[1])
-                    lista_dados[8]['valoRA'] = item
-                    lista_dados[8]['valorB'] = itens[1]
-                    break
+                        itens[len(itens) -
+                              2] = remover_unidades(itens[len(itens)-2])
+                        if float(itens[len(itens)-2]) > 3000:
+                            continue
 
-                # Neutrofilos Segmentados-----------------------------
-                if 4000 <= float(item) <= 7000:
-
-                    itens[len(itens)-2] = remover_unidades(itens[len(itens)-2])
-                    if float(itens[len(itens)-2]) > 3000:
-                        continue
-
-                    if len(itens) > 2:
-                        itens[0] = remover_unidades(itens[0])
-                        itens[1] = remover_unidades(itens[1])
-                        itens[2] = remover_unidades(itens[2])
-                        lista_dados[9]['mm3'] = itens[0]
-                        lista_dados[9]['valoRA'] = itens[1]
-                        lista_dados[9]['valorB'] = itens[2]
-                    else:
-                        itens[0] = remover_unidades(itens[0])
-                        lista_dados[9]['valoRA'] = itens[0]
-                        lista_dados[9]['valorB'] = item
-                    break
-
-                # Linfocitos----------------------
-                if float(item) == 3500 or float(item) == 2500:
-
-                    itens[len(itens)-2] = remover_unidades(itens[len(itens)-2])
-                    if not (1000 <= float(itens[len(itens)-2]) <= 1200):
-                        continue
-
-                    if len(itens) > 2:
-                        itens[0] = remover_unidades(itens[0])
-                        itens[1] = remover_unidades(itens[1])
-                        itens[2] = remover_unidades(itens[2])
-                        lista_dados[10]['mm3'] = itens[0]
-                        lista_dados[10]['valoRA'] = itens[1]
-                        lista_dados[10]['valorB'] = itens[2]
-                    else:
-                        itens[0] = remover_unidades(itens[0])
-                        lista_dados[10]['valoRA'] = itens[0]
-                        lista_dados[10]['valorB'] = item
-                    break
-
-                # Monocitos-------------------------------------------
-                if float(item) <= 1000:
-                    itens[len(itens)-2] = remover_unidades(itens[len(itens)-2])
-                    if (80 <= float(itens[len(itens)-2]) <= 200):
                         if len(itens) > 2:
                             itens[0] = remover_unidades(itens[0])
                             itens[1] = remover_unidades(itens[1])
                             itens[2] = remover_unidades(itens[2])
-                            lista_dados[11]['mm3'] = itens[0]
-                            lista_dados[11]['valoRA'] = itens[1]
-                            lista_dados[11]['valorB'] = itens[2]
-
+                            lista_dados[9]['mm3'] = itens[0]
+                            lista_dados[9]['valoRA'] = itens[1]
+                            lista_dados[9]['valorB'] = itens[2]
                         else:
                             itens[0] = remover_unidades(itens[0])
-                            lista_dados[11]['valoRA'] = itens[0]
-                            lista_dados[11]['valorB'] = item
-
+                            lista_dados[9]['valoRA'] = itens[0]
+                            lista_dados[9]['valorB'] = item
                         break
 
-                # Eosinofilos --------------------------------------------
-                if float(item) == 500 or float(item) == 300:
-                    if len(itens) > 2:
-                        itens[0] = remover_unidades(itens[0])
-                        itens[1] = remover_unidades(itens[1])
-                        itens[2] = remover_unidades(itens[2])
-                        lista_dados[12]['mm3'] = itens[0]
-                        lista_dados[12]['valoRA'] = itens[1]
-                        lista_dados[12]['valorB'] = itens[2]
-                    else:
-                        itens[0] = remover_unidades(itens[0])
-                        lista_dados[12]['valoRA'] = itens[0]
-                        lista_dados[12]['valorB'] = item
-                    break
+                    # Linfocitos----------------------
+                    if float(item) == 3500 or float(item) == 2500:
 
-                # Basofilos --------------------------------------------
-                if float(item) == 200:
-                    itens[len(itens)-2] = remover_unidades(itens[len(itens)-2])
-                    if (float(itens[len(itens)-2]) != 20):
-                        continue
+                        itens[len(itens) -
+                              2] = remover_unidades(itens[len(itens)-2])
+                        if not (1000 <= float(itens[len(itens)-2]) <= 1200):
+                            continue
 
-                    if len(itens) > 2:
-                        itens[0] = remover_unidades(itens[0])
-                        itens[1] = remover_unidades(itens[1])
-                        itens[2] = remover_unidades(itens[2])
-                        lista_dados[13]['mm3'] = itens[0]
-                        lista_dados[13]['valoRA'] = itens[1]
-                        lista_dados[13]['valorB'] = itens[2]
-                    else:
-                        itens[0] = remover_unidades(itens[0])
-                        lista_dados[13]['valoRA'] = itens[0]
-                        lista_dados[13]['valorB'] = item
-                    break
+                        if len(itens) > 2:
+                            itens[0] = remover_unidades(itens[0])
+                            itens[1] = remover_unidades(itens[1])
+                            itens[2] = remover_unidades(itens[2])
+                            lista_dados[10]['mm3'] = itens[0]
+                            lista_dados[10]['valoRA'] = itens[1]
+                            lista_dados[10]['valorB'] = itens[2]
+                        else:
+                            itens[0] = remover_unidades(itens[0])
+                            lista_dados[10]['valoRA'] = itens[0]
+                            lista_dados[10]['valorB'] = item
+                        break
+
+                    # Monocitos-------------------------------------------
+                    if float(item) <= 1000:
+                        itens[len(itens) -
+                              2] = remover_unidades(itens[len(itens)-2])
+                        if (80 <= float(itens[len(itens)-2]) <= 200):
+                            if len(itens) > 2:
+                                itens[0] = remover_unidades(itens[0])
+                                itens[1] = remover_unidades(itens[1])
+                                itens[2] = remover_unidades(itens[2])
+                                lista_dados[11]['mm3'] = itens[0]
+                                lista_dados[11]['valoRA'] = itens[1]
+                                lista_dados[11]['valorB'] = itens[2]
+
+                            else:
+                                itens[0] = remover_unidades(itens[0])
+                                lista_dados[11]['valoRA'] = itens[0]
+                                lista_dados[11]['valorB'] = item
+
+                            break
+
+                    # Eosinofilos --------------------------------------------
+                    if float(item) == 500 or float(item) == 300:
+                        if len(itens) > 2:
+                            itens[0] = remover_unidades(itens[0])
+                            itens[1] = remover_unidades(itens[1])
+                            itens[2] = remover_unidades(itens[2])
+                            lista_dados[12]['mm3'] = itens[0]
+                            lista_dados[12]['valoRA'] = itens[1]
+                            lista_dados[12]['valorB'] = itens[2]
+                        else:
+                            itens[0] = remover_unidades(itens[0])
+                            lista_dados[12]['valoRA'] = itens[0]
+                            lista_dados[12]['valorB'] = item
+                        break
+
+                    # Basofilos --------------------------------------------
+                    if float(item) == 200:
+                        itens[len(itens) -
+                              2] = remover_unidades(itens[len(itens)-2])
+                        if (float(itens[len(itens)-2]) != 20):
+                            continue
+
+                        if len(itens) > 2:
+                            itens[0] = remover_unidades(itens[0])
+                            itens[1] = remover_unidades(itens[1])
+                            itens[2] = remover_unidades(itens[2])
+                            lista_dados[13]['mm3'] = itens[0]
+                            lista_dados[13]['valoRA'] = itens[1]
+                            lista_dados[13]['valorB'] = itens[2]
+                        else:
+                            itens[0] = remover_unidades(itens[0])
+                            lista_dados[13]['valoRA'] = itens[0]
+                            lista_dados[13]['valorB'] = item
+                        break
 
             lista_dados[14]['valoRA'] = 150000
             lista_dados[14]['valorB'] = 450000
 
-    for j, itens in enumerate(lista):
-        if j == 7:
-            break
+        for j, itens in enumerate(lista):
+            if j == 7:
+                break
 
         for item in itens:
             # Hemoglobina-------------CHCM--------------
@@ -453,13 +464,18 @@ def classifica_dados(lista_fatorada, list_captura_dados):
                     lista_dados[4]['valorB'] = item
                     break
 
-    return lista_dados
+        return lista_dados
+    except Exception:
+        return jsonify({'mensagem': "Erro no servidor"}), 500
 
 
 def retunr_lista(texto):
+    """"""
 
-    resultado = analisa_dados(texto,
-                              lista_informacoes_buscada, list_captura_dados)
-
-    lista_f = separa_dados_referencia(resultado[1])
-    return classifica_dados(lista_f, resultado[0])
+    try:
+        resultado = analisa_dados(texto,
+                                  lista_informacoes_buscada, list_captura_dados)
+        lista_f = separa_dados_referencia(resultado[1])
+        return classifica_dados(lista_f, resultado[0])
+    except Exception:
+        return jsonify({'mensagem': "Erro no servidor"}), 500
