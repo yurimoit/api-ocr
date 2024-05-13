@@ -5,6 +5,21 @@ from difflib import SequenceMatcher
 from flask import jsonify
 
 
+def remove_nao_letras(texto):
+    """Função que remove todos caracteres que não são letras."""
+    return re.sub(r'[^a-zA-Z]', '', texto)
+
+
+def remover_caracteres_especiais(texto):
+    return re.sub(r'[^a-zA-Z0-9.,]', '', texto)
+
+
+def remover_caracteres(texto):
+    """Função para remover caracteres"""
+    texto_limpo = re.sub(r'[^\d.,]', '', texto)
+    return texto_limpo
+
+
 def buscar_dados(texto_gerado, lista, list_captura_dados):
     """Função para separa dados do exame."""
 
@@ -12,9 +27,11 @@ def buscar_dados(texto_gerado, lista, list_captura_dados):
         lista_padrao = lista.copy()
         lista_dados_finais = copy.deepcopy(list_captura_dados)
         parametro: float = 0.6
+        nova_palavra: str = ''
+        lista_de_referencia = ["/mm3", '/mm', 'g/dl', '%', 'fl',
+                               'pg', 'u3', 'g3', '&', 'de', "‘", "`", 't', 'u³', '/mm³', 'milhões/mm³', '£1', '£2']
 
         for dicionario in lista_dados_finais:
-
             for chave, _ in dicionario.items():
                 if chave == 'mm3':
                     dicionario['mm3'] = '--'
@@ -23,33 +40,11 @@ def buscar_dados(texto_gerado, lista, list_captura_dados):
             dicionario['valoRA'] = '--'
             dicionario['valorB'] = '--'
 
-        def remove_nao_letras(texto):
-            """Função que remove todos caracteres que não são letras."""
-            return re.sub(r'[^a-zA-Z]', '', texto)
-
-        def remover_caracteres_especiais(texto):
-            return re.sub(r'[^a-zA-Z0-9.,]', '', texto)
-
-        def remover_caracteres(texto):
-            """Use expressões regulares para substituir todos os caracteres não desejados"""
-            texto_limpo = re.sub(r'[^\d.,]', '', texto)
-            return texto_limpo
-
-        nova_palavra: str = ''
-
-        # print("TEXTO GERADO: ", texto_gerado)
-        # print("TAMANHO TEXTO GERADO: ", len(texto_gerado))
-
-        # textos_lines = texto_gerado
-
         if isinstance(texto_gerado, tuple):
             texto_gerado = list(texto_gerado)
             texto_gerado = texto_gerado[0]
 
-        textos_lines = texto_gerado.splitlines()
-
-        lista_de_referencia = ["/mm3", '/mm', 'g/dl', '%', 'fl',
-                               'pg', 'u3', 'g3', '&', 'de', "‘", "`", 't', 'u³', '/mm³', 'milhões/mm³', '£1', '£2']
+        textos_lines = texto_gerado.lowe().splitlines()
 
         for line in textos_lines:
 
@@ -59,10 +54,10 @@ def buscar_dados(texto_gerado, lista, list_captura_dados):
             for index, caractere in enumerate(line):
                 if caractere.isdigit():
                     nova_palavra = line[0:index-1]
-                    nova_palavra = remove_nao_letras(nova_palavra).lower()
+                    nova_palavra = remove_nao_letras(nova_palavra)
 
                     numero_dado = re.split(
-                        '|'.join(lista_de_referencia), line[index:].lower().replace(',', '.').replace(' ', ''))
+                        '|'.join(lista_de_referencia), line[index:].replace(',', '.').replace(' ', ''))
 
                     for item in numero_dado.copy():
                         numero_dado.remove(item)
@@ -100,7 +95,7 @@ def buscar_dados(texto_gerado, lista, list_captura_dados):
 
                     for item in lista_dados_finais:
                         if palavra_padrao == item['nome']:
-                            # print("Entrou ", palavra_padrao, numero_dado)
+
                             if isinstance(numero_dado, list):
                                 item['nome'] = palavra_padrao
 
@@ -116,8 +111,6 @@ def buscar_dados(texto_gerado, lista, list_captura_dados):
 
                                     item['valorPR'] = item['valorPR'][0:(
                                         len(item['valorPR'])-5)]
-
-                                # print(item['valorPR'])
 
                                 if len(numero_dado) == 3:
                                     padrao_ed = re.compile(r'^[a-zA-Z]\d{3}$')
@@ -183,6 +176,8 @@ def buscar_dados(texto_gerado, lista, list_captura_dados):
 
 
 def corrigir_dados(lista_dados):
+    """ """
+
     try:
         for dicionario in lista_dados:
             for chave in dicionario.keys():

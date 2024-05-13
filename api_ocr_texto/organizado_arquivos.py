@@ -109,31 +109,6 @@ list_captura_dados = [{'nome': 'hemacias', 'valorPR': '--', 'valoRA': '--', 'val
                       {'nome': 'plaquetas', 'valorPR': '--', 'valoRA': '--', 'valorB': '--', 'unidade': '/mm³'}]
 
 
-def analisador_palavra(info, dado, contador):
-    """"""
-
-    for palavra in info:
-        comparador = SequenceMatcher(
-            None,   palavra, (dado.lower()).replace('á', 'a'))
-
-        # Obtendo a semelhança entre as duas palavras
-        semelhanca = comparador.ratio()
-        if semelhanca >= 0.6:
-            dado = info[contador]
-            break
-
-    return dado
-
-
-def verifica_nome(dicionario, info, contador):
-    """"""
-    if (dicionario['nome'] == info[contador]):
-        print(dicionario['nome'], info[contador])
-        return True
-
-    return False
-
-
 def analisa_dados(dados, informacoes_buscada, list_captura_dados):
     """Separa e analisa dados"""
 
@@ -270,7 +245,6 @@ def classifica_dados(lista_fatorada, list_captura_dados):
     """"""
     try:
         lista = copy.deepcopy(lista_fatorada)
-        lista_2 = copy.deepcopy(lista_fatorada)
         lista_dados = copy.deepcopy(list_captura_dados)
 
         for itens in lista:
@@ -471,7 +445,6 @@ def classifica_dados(lista_fatorada, list_captura_dados):
 
 def retunr_lista(texto):
     """"""
-
     try:
         resultado = analisa_dados(texto,
                                   lista_informacoes_buscada, list_captura_dados)
