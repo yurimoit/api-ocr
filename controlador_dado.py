@@ -184,7 +184,7 @@ def corrigir_dados(lista_dados):
                 if chave in ('nome', 'unidade'):
                     continue
 
-                if '.' not in (dicionario[chave]):
+                if '.' not in dicionario[chave]:
                     continue
 
                 separador = (dicionario[chave]).split('.')
