@@ -184,62 +184,63 @@ def corrigir_dados(lista_dados):
                 if chave in ('nome', 'unidade'):
                     continue
 
-                if '.' in (dicionario[chave]):
-                    separador = (dicionario[chave]).split('.')
+                if '.' not in (dicionario[chave]):
+                    continue
 
-                    if (dicionario['nome'] == 'hemacias') and (len(dicionario[chave]) >= 4):
-                        lista_palavra_hemacias = list(
-                            (dicionario[chave]).replace('.', ''))
-                        dicionario[chave] = lista_palavra_hemacias[0] + '.' + \
-                            lista_palavra_hemacias[1]+lista_palavra_hemacias[2]
-                        continue
+                separador = (dicionario[chave]).split('.')
 
-                    padrao = re.compile(r'\d{1}[.]\d{3}[.]\d{1}')
-                    if padrao.search(dicionario[chave]):
+                if (dicionario['nome'] == 'hemacias') and (len(dicionario[chave]) >= 4):
+                    lista_palavra_hemacias = list(
+                        (dicionario[chave]).replace('.', ''))
+                    dicionario[chave] = lista_palavra_hemacias[0] + '.' + \
+                        lista_palavra_hemacias[1]+lista_palavra_hemacias[2]
+                    continue
 
-                        # print(dicionario[chave])
+                padrao = re.compile(r'\d{1}[.]\d{3}[.]\d{1}')
+                if padrao.search(dicionario[chave]):
 
-                        dicionario[chave] = (dicionario[chave][0:(
-                            len(dicionario[chave])-1)]).replace('.', '')
+                    # print(dicionario[chave])
 
+                    dicionario[chave] = (dicionario[chave][0:(
+                        len(dicionario[chave])-1)]).replace('.', '')
+
+                    dicionario[chave] = f'{round(float(dicionario[chave]),2)}'
+                    continue
+
+                if len(separador) != 2:
+                    continue
+
+                if dicionario['nome'] == 'plaquetas':
+
+                    if len(separador[1]) == 2:
+                        dicionario[chave] = separador[0] + \
+                            separador[1][0] + \
+                            separador[1][0] + "0"
+
+                    if len(separador[1]) > 2:
+                        dicionario[chave] = separador[0] + \
+                            separador[1][0] + \
+                            separador[1][1]+separador[1][2]
+
+                    continue
+
+                if dicionario['nome'] == 'hematocrito':
+
+                    if (len(separador[0]) <= 2) and (len(separador[1]) == 3):
+                        dicionario[chave] = round(
+                            float(dicionario[chave]), 2)
+
+                    continue
+
+                if (len(separador[0]) <= 2) and (len(separador[1]) == 3):
+                    dicionario[chave] = (
+                        dicionario[chave]).replace('.', '')
+
+                    if (dicionario[chave]).isdigit():
                         dicionario[chave] = f'{round(float(dicionario[chave]),2)}'
-                        continue
 
-                    if len(separador) == 2:
-
-                        if dicionario['nome'] == 'plaquetas':
-
-                            if len(separador[1]) == 2:
-                                dicionario[chave] = separador[0] + \
-                                    separador[1][0] + \
-                                    separador[1][0] + "0"
-
-                            if len(separador[1]) > 2:
-                                dicionario[chave] = separador[0] + \
-                                    separador[1][0] + \
-                                    separador[1][1]+separador[1][2]
-
-                            continue
-
-                        if dicionario['nome'] == 'hematocrito':
-
-                            if (len(separador[0]) <= 2) and (len(separador[1]) == 3):
-                                dicionario[chave] = round(
-                                    float(dicionario[chave]), 2)
-
-                            continue
-
-                        if (len(separador[0]) <= 2) and (len(separador[1]) == 3):
-                            dicionario[chave] = (
-                                dicionario[chave]).replace('.', '')
-
-                            if (dicionario[chave]).isdigit():
-                                dicionario[chave] = f'{round(float(dicionario[chave]),2)}'
-
-                        continue
-
-                    dicionario[chave] = (dicionario[chave][0:(len(dicionario[chave])-1)]).replace(
-                        '.', '') + dicionario[chave][len(dicionario[chave])-1]
+                dicionario[chave] = (dicionario[chave][0:(len(dicionario[chave])-1)]).replace(
+                    '.', '') + dicionario[chave][len(dicionario[chave])-1]
 
         return lista_dados
     except Exception as e:
