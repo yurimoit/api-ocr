@@ -122,18 +122,17 @@ def analisa_dados(dados, informacoes_buscada, list_captura_dados):
         semelhanca_rr = 0
         lista_referencia = []
 
-        for i, bloco in enumerate(lista_frases):
+        for bloco in lista_frases:
             lista_dados_bloco = bloco.strip().split(' ')
 
-            comparador = SequenceMatcher(
-                None,   'valores de referencia', (bloco).replace(":", "").replace('ê', 'e'))
-            semelhanca_rr = comparador.ratio()
+            if len(lista_referencia) == 0:
+                comparador = SequenceMatcher(
+                    None,   'valores de referencia', (bloco).replace(":", "").replace('ê', 'e'))
+                semelhanca_rr = comparador.ratio()
 
-            if semelhanca_rr >= 0.6:
-                lista_referencia = lista_frases[lista_frases.index(
-                    bloco)+1:lista_frases.index(bloco)+15]
-
-                # print(lista_referencia)
+                if semelhanca_rr >= 0.6:
+                    lista_referencia = lista_frases[lista_frases.index(
+                        bloco)+1:lista_frases.index(bloco)+15]
 
             if not (1 < len(lista_dados_bloco) < 4):
                 continue
@@ -189,6 +188,10 @@ def analisa_dados(dados, informacoes_buscada, list_captura_dados):
 def separa_dados_referencia(lista_referencia):
 
     try:
+
+        if len(lista_referencia) < 1:
+            return lista_referencia
+
         lista = copy.copy(lista_referencia)
 
         lista_fatorada = []
@@ -249,194 +252,198 @@ def classifica_dados(lista_fatorada, list_captura_dados):
 
         for itens in lista:
             for item in itens:
-                if '/mm3' in item:
-                    item = remover_unidades(item)
+                if '/mm3' not in item:
+                    continue
 
-                    # Hemacias------------------------------------------
-                    if len(item) > 7 and float(item) > 3000000:
+                item = remover_unidades(item)
+
+                # Hemacias------------------------------------------
+                if len(item) > 7 and float(item) > 3000000:
+                    itens[0] = remover_unidades(itens[0])
+                    lista_dados[0]['valoRA'] = str(float(itens[0])/10**6)
+                    lista_dados[0]['valorB'] = str(float(item)/10**6)
+                    break
+
+                if 3.8 <= float(item) <= 6.5:
+                    itens[0] = remover_unidades(itens[0])
+                    lista_dados[0]['valoRA'] = str(float(itens[0])/10**6)
+                    lista_dados[0]['valorB'] = str(float(item)/10**6)
+                    break
+
+                # Leuocitos Global---------------------------------
+                if 10000 <= float(item) <= 15000:
+                    if len(itens) > 2:
                         itens[0] = remover_unidades(itens[0])
-                        lista_dados[0]['valoRA'] = str(float(itens[0])/10**6)
-                        lista_dados[0]['valorB'] = str(float(item)/10**6)
-                        break
-
-                    if 3.8 <= float(item) <= 6.5:
-                        itens[0] = remover_unidades(itens[0])
-                        lista_dados[0]['valoRA'] = str(float(itens[0])/10**6)
-                        lista_dados[0]['valorB'] = str(float(item)/10**6)
-                        break
-
-                    # Leuocitos Global---------------------------------
-
-                    if 10000 <= float(item) <= 15000:
-                        if len(itens) > 2:
-                            itens[0] = remover_unidades(itens[0])
-                            itens[1] = remover_unidades(itens[1])
-                            lista_dados[7]['valorPR'] = itens[0]
-                            lista_dados[7]['valoRA'] = itens[1]
-                            lista_dados[7]['valorB'] = item
-                        else:
-                            itens[0] = remover_unidades(itens[0])
-                            lista_dados[7]['valoRA'] = itens[0]
-                            lista_dados[7]['valorB'] = item
-
-                        break
-
-                    # Neutrofilos bastonetes-----------------------------
-                    if float(item) == 0:
                         itens[1] = remover_unidades(itens[1])
-                        lista_dados[8]['valoRA'] = item
-                        lista_dados[8]['valorB'] = itens[1]
-                        break
+                        lista_dados[7]['valorPR'] = itens[0]
+                        lista_dados[7]['valoRA'] = itens[1]
+                        lista_dados[7]['valorB'] = item
+                    else:
+                        itens[0] = remover_unidades(itens[0])
+                        lista_dados[7]['valoRA'] = itens[0]
+                        lista_dados[7]['valorB'] = item
 
-                    # Neutrofilos Segmentados-----------------------------
-                    if 4000 <= float(item) <= 7000:
+                    break
 
-                        itens[len(itens) -
-                              2] = remover_unidades(itens[len(itens)-2])
-                        if float(itens[len(itens)-2]) > 3000:
-                            continue
+                # Neutrofilos bastonetes-----------------------------
+                if float(item) == 0:
+                    itens[1] = remover_unidades(itens[1])
+                    lista_dados[8]['valoRA'] = item
+                    lista_dados[8]['valorB'] = itens[1]
+                    break
 
+                # Neutrofilos Segmentados-----------------------------
+                if 4000 <= float(item) <= 7000:
+
+                    itens[len(itens) -
+                          2] = remover_unidades(itens[len(itens)-2])
+                    if float(itens[len(itens)-2]) > 3000:
+                        continue
+
+                    if len(itens) > 2:
+                        itens[0] = remover_unidades(itens[0])
+                        itens[1] = remover_unidades(itens[1])
+                        itens[2] = remover_unidades(itens[2])
+                        lista_dados[9]['mm3'] = itens[0]
+                        lista_dados[9]['valoRA'] = itens[1]
+                        lista_dados[9]['valorB'] = itens[2]
+                    else:
+                        itens[0] = remover_unidades(itens[0])
+                        lista_dados[9]['valoRA'] = itens[0]
+                        lista_dados[9]['valorB'] = item
+                    break
+
+                # Linfocitos----------------------
+                if float(item) == 3500 or float(item) == 2500:
+
+                    itens[len(itens) -
+                          2] = remover_unidades(itens[len(itens)-2])
+                    if not (1000 <= float(itens[len(itens)-2]) <= 1200):
+                        continue
+
+                    if len(itens) > 2:
+                        itens[0] = remover_unidades(itens[0])
+                        itens[1] = remover_unidades(itens[1])
+                        itens[2] = remover_unidades(itens[2])
+                        lista_dados[10]['mm3'] = itens[0]
+                        lista_dados[10]['valoRA'] = itens[1]
+                        lista_dados[10]['valorB'] = itens[2]
+                    else:
+                        itens[0] = remover_unidades(itens[0])
+                        lista_dados[10]['valoRA'] = itens[0]
+                        lista_dados[10]['valorB'] = item
+                    break
+
+                # Monocitos-------------------------------------------
+                if float(item) <= 1000:
+                    itens[len(itens) -
+                          2] = remover_unidades(itens[len(itens)-2])
+                    if (80 <= float(itens[len(itens)-2]) <= 200):
                         if len(itens) > 2:
                             itens[0] = remover_unidades(itens[0])
                             itens[1] = remover_unidades(itens[1])
                             itens[2] = remover_unidades(itens[2])
-                            lista_dados[9]['mm3'] = itens[0]
-                            lista_dados[9]['valoRA'] = itens[1]
-                            lista_dados[9]['valorB'] = itens[2]
+                            lista_dados[11]['mm3'] = itens[0]
+                            lista_dados[11]['valoRA'] = itens[1]
+                            lista_dados[11]['valorB'] = itens[2]
+
                         else:
                             itens[0] = remover_unidades(itens[0])
-                            lista_dados[9]['valoRA'] = itens[0]
-                            lista_dados[9]['valorB'] = item
+                            lista_dados[11]['valoRA'] = itens[0]
+                            lista_dados[11]['valorB'] = item
+
                         break
 
-                    # Linfocitos----------------------
-                    if float(item) == 3500 or float(item) == 2500:
+                # Eosinofilos --------------------------------------------
+                if float(item) == 500 or float(item) == 300:
+                    if len(itens) > 2:
+                        itens[0] = remover_unidades(itens[0])
+                        itens[1] = remover_unidades(itens[1])
+                        itens[2] = remover_unidades(itens[2])
+                        lista_dados[12]['mm3'] = itens[0]
+                        lista_dados[12]['valoRA'] = itens[1]
+                        lista_dados[12]['valorB'] = itens[2]
+                    else:
+                        itens[0] = remover_unidades(itens[0])
+                        lista_dados[12]['valoRA'] = itens[0]
+                        lista_dados[12]['valorB'] = item
+                    break
 
-                        itens[len(itens) -
-                              2] = remover_unidades(itens[len(itens)-2])
-                        if not (1000 <= float(itens[len(itens)-2]) <= 1200):
-                            continue
+                # Basofilos --------------------------------------------
+                if float(item) == 200:
+                    itens[len(itens) -
+                          2] = remover_unidades(itens[len(itens)-2])
+                    if (float(itens[len(itens)-2]) != 20):
+                        continue
 
-                        if len(itens) > 2:
-                            itens[0] = remover_unidades(itens[0])
-                            itens[1] = remover_unidades(itens[1])
-                            itens[2] = remover_unidades(itens[2])
-                            lista_dados[10]['mm3'] = itens[0]
-                            lista_dados[10]['valoRA'] = itens[1]
-                            lista_dados[10]['valorB'] = itens[2]
-                        else:
-                            itens[0] = remover_unidades(itens[0])
-                            lista_dados[10]['valoRA'] = itens[0]
-                            lista_dados[10]['valorB'] = item
+                    if len(itens) > 2:
+                        itens[0] = remover_unidades(itens[0])
+                        itens[1] = remover_unidades(itens[1])
+                        itens[2] = remover_unidades(itens[2])
+                        lista_dados[13]['mm3'] = itens[0]
+                        lista_dados[13]['valoRA'] = itens[1]
+                        lista_dados[13]['valorB'] = itens[2]
+                    else:
+                        itens[0] = remover_unidades(itens[0])
+                        lista_dados[13]['valoRA'] = itens[0]
+                        lista_dados[13]['valorB'] = item
+                    break
+
+        for itens in lista:
+            for item in itens:
+
+                if '/mm3' in item:
+                    break
+                # Hemoglobina-------------CHCM--------------
+                if ('g/dl' in item) and (len(itens) > 1):
+                    item = remover_unidades(item)
+                    if (float(item) <= 18):
+                        itens[0] = remover_unidades(itens[0])
+                        lista_dados[1]['valoRA'] = itens[0]
+                        lista_dados[1]['valorB'] = item
                         break
 
-                    # Monocitos-------------------------------------------
-                    if float(item) <= 1000:
-                        itens[len(itens) -
-                              2] = remover_unidades(itens[len(itens)-2])
-                        if (80 <= float(itens[len(itens)-2]) <= 200):
-                            if len(itens) > 2:
-                                itens[0] = remover_unidades(itens[0])
-                                itens[1] = remover_unidades(itens[1])
-                                itens[2] = remover_unidades(itens[2])
-                                lista_dados[11]['mm3'] = itens[0]
-                                lista_dados[11]['valoRA'] = itens[1]
-                                lista_dados[11]['valorB'] = itens[2]
-
-                            else:
-                                itens[0] = remover_unidades(itens[0])
-                                lista_dados[11]['valoRA'] = itens[0]
-                                lista_dados[11]['valorB'] = item
-
-                            break
-
-                    # Eosinofilos --------------------------------------------
-                    if float(item) == 500 or float(item) == 300:
-                        if len(itens) > 2:
-                            itens[0] = remover_unidades(itens[0])
-                            itens[1] = remover_unidades(itens[1])
-                            itens[2] = remover_unidades(itens[2])
-                            lista_dados[12]['mm3'] = itens[0]
-                            lista_dados[12]['valoRA'] = itens[1]
-                            lista_dados[12]['valorB'] = itens[2]
-                        else:
-                            itens[0] = remover_unidades(itens[0])
-                            lista_dados[12]['valoRA'] = itens[0]
-                            lista_dados[12]['valorB'] = item
+                    if ((float(item) >= 31)):
+                        itens[0] = remover_unidades(itens[0])
+                        lista_dados[5]['valoRA'] = itens[0]
+                        lista_dados[5]['valorB'] = item
                         break
 
-                    # Basofilos --------------------------------------------
-                    if float(item) == 200:
-                        itens[len(itens) -
-                              2] = remover_unidades(itens[len(itens)-2])
-                        if (float(itens[len(itens)-2]) != 20):
-                            continue
-
-                        if len(itens) > 2:
-                            itens[0] = remover_unidades(itens[0])
-                            itens[1] = remover_unidades(itens[1])
-                            itens[2] = remover_unidades(itens[2])
-                            lista_dados[13]['mm3'] = itens[0]
-                            lista_dados[13]['valoRA'] = itens[1]
-                            lista_dados[13]['valorB'] = itens[2]
-                        else:
-                            itens[0] = remover_unidades(itens[0])
-                            lista_dados[13]['valoRA'] = itens[0]
-                            lista_dados[13]['valorB'] = item
+                # Hematocrito--------------RDW-------------
+                if ('%' in item) and (len(itens) > 1):
+                    item = remover_unidades(item)
+                    if (float(item) <= 16):
+                        itens[0] = remover_unidades(itens[0])
+                        lista_dados[2]['valoRA'] = itens[0]
+                        lista_dados[2]['valorB'] = item
                         break
 
-            lista_dados[14]['valoRA'] = 150000
-            lista_dados[14]['valorB'] = 450000
+                    if ((float(item) >= 35)):
+                        itens[0] = remover_unidades(itens[0])
+                        lista_dados[6]['valoRA'] = itens[0]
+                        lista_dados[6]['valorB'] = item
+                        break
 
-        for j, itens in enumerate(lista):
-            if j == 7:
-                break
+                # VCM---------------------------
+                if (('£1' in item) or ('fl' in item)) and (len(itens) > 1):
+                    item = remover_unidades(item)
+                    if (float(item) >= 78):
+                        itens[0] = remover_unidades(itens[0])
+                        lista_dados[3]['valoRA'] = itens[0]
+                        lista_dados[3]['valorB'] = item
+                        break
 
-        for item in itens:
-            # Hemoglobina-------------CHCM--------------
-            if ('g/dl' in item) and (len(itens) > 1):
-                item = remover_unidades(item)
-                if (float(item) <= 18):
-                    itens[0] = remover_unidades(itens[0])
-                    lista_dados[1]['valoRA'] = itens[0]
-                    lista_dados[1]['valorB'] = item
-                    break
-                elif ((float(item) >= 31)):
-                    itens[0] = remover_unidades(itens[0])
-                    lista_dados[5]['valoRA'] = itens[0]
-                    lista_dados[5]['valorB'] = item
-                    break
+                # HCM-------------------------------------
+                if ('pg' in item) and (len(itens) > 1):
+                    item = remover_unidades(item)
+                    if (float(item) >= 26):
+                        itens[0] = remover_unidades(itens[0])
+                        lista_dados[4]['valoRA'] = itens[0]
+                        lista_dados[4]['valorB'] = item
+                        break
 
-            # Hematocrito--------------RDW-------------
-            if ('%' in item) and (len(itens) > 1):
-                item = remover_unidades(item)
-                if (float(item) <= 16):
-                    itens[0] = remover_unidades(itens[0])
-                    lista_dados[2]['valoRA'] = itens[0]
-                    lista_dados[2]['valorB'] = item
-                    break
-                elif ((float(item) >= 35)):
-                    itens[0] = remover_unidades(itens[0])
-                    lista_dados[6]['valoRA'] = itens[0]
-                    lista_dados[6]['valorB'] = item
-                    break
-            # VCM---------------------------
-            if (('£1' in item) or ('fl' in item)) and (len(itens) > 1):
-                item = remover_unidades(item)
-                if (float(item) >= 78):
-                    itens[0] = remover_unidades(itens[0])
-                    lista_dados[3]['valoRA'] = itens[0]
-                    lista_dados[3]['valorB'] = item
-                    break
-
-            # Hematocrito--------------RDW-------------
-            if ('pg' in item) and (len(itens) > 1):
-                item = remover_unidades(item)
-                if (float(item) >= 26):
-                    itens[0] = remover_unidades(itens[0])
-                    lista_dados[4]['valoRA'] = itens[0]
-                    lista_dados[4]['valorB'] = item
-                    break
+        lista_dados[14]['valoRA'] = 150000
+        lista_dados[14]['valorB'] = 450000
 
         return lista_dados
     except Exception:
@@ -448,6 +455,7 @@ def retunr_lista(texto):
     try:
         resultado = analisa_dados(texto,
                                   lista_informacoes_buscada, list_captura_dados)
+
         lista_f = separa_dados_referencia(resultado[1])
         return classifica_dados(lista_f, resultado[0])
     except Exception:
