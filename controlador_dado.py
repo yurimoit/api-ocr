@@ -44,7 +44,7 @@ def buscar_dados(texto_gerado, lista, list_captura_dados):
             texto_gerado = list(texto_gerado)
             texto_gerado = texto_gerado[0]
 
-        textos_lines = texto_gerado.lowe().splitlines()
+        textos_lines = texto_gerado.lower().splitlines()
 
         for line in textos_lines:
 
