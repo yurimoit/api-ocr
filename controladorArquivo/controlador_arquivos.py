@@ -93,15 +93,14 @@ def detect_text(image, credentials_json):
         with BytesIO() as output:
             image_contrast_3.save(output, format='PNG')
             content = output.getvalue()
+            gcp_image = vision.Image(content=content)
+            response = client.text_detection(image=gcp_image)
 
-        gcp_image = vision.Image(content=content)
+            print("RESPONSE: ", response.full_text_annotation.text)
+            texto = response.full_text_annotation.text
+            print("Texts:")
 
-        response = client.text_detection(image=gcp_image)
-        print("RESPONSE: ", response.full_text_annotation.text)
-        texto = response.full_text_annotation.text
-        print("Texts:")
-
-        return texto
+            return texto
 
     except Exception as e:
         print('Erro na função do Google: ', str(e))
@@ -136,14 +135,6 @@ def ocr_image_to_text(image):
                 os.unlink(temp_image.name)
             except Exception:
                 return jsonify({'mensagem': "Erro no servidor"}), 500
-
-# width, height = image_open.size
-        # new_width = 4000
-        # new_height = round(height*new_width/width)
-
-        # new_image = image_open.resize((new_width, new_height),
-        #                               # pylint: disable=E1101
-        #                               Image.LANCZOS)
 
 
 def ocr_pdf_to_text(pdf_path):
@@ -227,17 +218,17 @@ def analisa_text(file_extension, response_content):
     try:
         if file_extension in ('.png', '.jpg', '.jpeg'):
             image = Image.open(BytesIO(response_content))
-            # ocr_text = ocr_image_to_text(image)
-            ocr_text = detect_text(image, credentials_json)
+            ocr_text = ocr_image_to_text(image)
+            # ocr_text = detect_text(image, credentials_json)
 
-            if ocr_text:
+            # if ocr_text:
 
-                lista_corrigida = retunr_lista(ocr_text)
+            #     lista_corrigida = retunr_lista(ocr_text)
 
-                nota = analisa_dados_range_referencia(
-                    lista_corrigida)
+            #     nota = analisa_dados_range_referencia(
+            #         lista_corrigida)
 
-            return [lista_corrigida, nota]
+            # return [lista_corrigida, nota]
 
         elif file_extension == '.pdf':
             ocr_text = ocr_pdf_to_text(BytesIO(response_content))

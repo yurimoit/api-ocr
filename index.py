@@ -1,3 +1,4 @@
+# pylint: disable=missing-function-docstring
 """Module providing a function printing python version."""
 import os
 from dotenv import load_dotenv
@@ -123,7 +124,8 @@ def get_string():
     try:
 
         if app.config['NOME_IMAGEM']:
-            file_url = f"https://f005.backblazeb2.com/file/TesteExameSangueOcr/{app.config['NOME_IMAGEM']}"
+            file_url = f"https://f005.backblazeb2.com/file/TesteExameSangueOcr/{
+                app.config['NOME_IMAGEM']}"
 
             # Baixar a imagem da URL
             response = requests.get(file_url)

@@ -273,14 +273,14 @@ def analisa_dados_range_referencia(lista_dados):
 
             if referencia_valor < referencia_a:
                 lista_dados_fora_referencia.append(
-                    f'{(dicionario["nome"]).upper()} ------- Está fora dos valores de referência.\n DADO: {referencia_valor} esta ABAIXO do valor de referência.\n'
+                    f'{(dicionario["nome"]).upper()} ------- Está fora dos valores de referência.\n DADO: {referencia_valor} está ABAIXO do valor de referência.\n'
                     f'  ---- Referência ----- {referencia_a} ATÉ {referencia_b} ------\n')
 
                 continue
 
             if referencia_valor > referencia_b:
                 lista_dados_fora_referencia.append(
-                    f'{(dicionario["nome"]).upper()} ------- Está fora dos valores de referência.\n DADO: {referencia_valor} esta ACIMA do valor de referência.\n'
+                    f'{(dicionario["nome"]).upper()} ------- Está fora dos valores de referência.\n DADO: {referencia_valor} está ACIMA do valor de referência.\n'
                     f'  ---- Referência ----- {referencia_a} ATÉ {referencia_b} ------\n')
 
                 continue
