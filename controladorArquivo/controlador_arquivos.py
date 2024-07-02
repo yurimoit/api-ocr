@@ -12,6 +12,8 @@ from controlador_dado import buscar_dados, corrigir_dados, analisa_dados_range_r
 from listas.lista_exame_hemograma import list_captura_dados
 from listas.lista_exame_hemograma import lista_informacoes_buscada
 from dotenv import load_dotenv
+
+pytesseract.pytesseract.tesseract_cmd = '/app/.apt/usr/bin/tesseract'
 # from google.cloud import vision
 # from google.oauth2 import service_account
 # from api_ocr_texto.organizado_arquivos import retunr_lista
