@@ -12,99 +12,99 @@ from controlador_dado import buscar_dados, corrigir_dados, analisa_dados_range_r
 from listas.lista_exame_hemograma import list_captura_dados
 from listas.lista_exame_hemograma import lista_informacoes_buscada
 from dotenv import load_dotenv
-from google.cloud import vision
-from google.oauth2 import service_account
-from api_ocr_texto.organizado_arquivos import retunr_lista
+# from google.cloud import vision
+# from google.oauth2 import service_account
+# from api_ocr_texto.organizado_arquivos import retunr_lista
 
 load_dotenv()
 
-TYPE_VALUE = os.getenv('typeValue')
-PROJECT_ID = os.getenv('projectId')
-PRIVATE_KEY_ID = os.getenv('privateKeyId')
-PRIVATE_KEY = os.getenv('privateKey')
-CLIENT_EMAIL = os.getenv('clientEmail')
-CLIENT_ID = os.getenv('clientId')
-AUTH_URI = os.getenv('authUri')
-TOKEN_URI = os.getenv('tokenUri')
-AUTH_PROVIDER_X509_CERT_URL = os.getenv('authProviderX509CertUrl')
-CLIENT_X_CERT_URL = os.getenv('clientX509CertUrl')
-UNIVERSE_DOMAIN = os.getenv('universeDomain')
+# TYPE_VALUE = os.getenv('typeValue')
+# PROJECT_ID = os.getenv('projectId')
+# PRIVATE_KEY_ID = os.getenv('privateKeyId')
+# PRIVATE_KEY = os.getenv('privateKey')
+# CLIENT_EMAIL = os.getenv('clientEmail')
+# CLIENT_ID = os.getenv('clientId')
+# AUTH_URI = os.getenv('authUri')
+# TOKEN_URI = os.getenv('tokenUri')
+# AUTH_PROVIDER_X509_CERT_URL = os.getenv('authProviderX509CertUrl')
+# CLIENT_X_CERT_URL = os.getenv('clientX509CertUrl')
+# UNIVERSE_DOMAIN = os.getenv('universeDomain')
 
-credentials_json = {
-    "type": TYPE_VALUE,
-    "project_id": PROJECT_ID,
-    "private_key_id": PRIVATE_KEY_ID,
-    "private_key": PRIVATE_KEY.replace("\\n", "\n"),
-    "client_email": CLIENT_EMAIL,
-    "client_id": CLIENT_ID,
-    "auth_uri": AUTH_URI,
-    "token_uri": TOKEN_URI,
-    "auth_provider_x509_cert_url": AUTH_PROVIDER_X509_CERT_URL,
-    "client_x509_cert_url": CLIENT_X_CERT_URL,
-    "universe_domain": UNIVERSE_DOMAIN
-}
+# credentials_json = {
+#     "type": TYPE_VALUE,
+#     "project_id": PROJECT_ID,
+#     "private_key_id": PRIVATE_KEY_ID,
+#     "private_key": PRIVATE_KEY.replace("\\n", "\n"),
+#     "client_email": CLIENT_EMAIL,
+#     "client_id": CLIENT_ID,
+#     "auth_uri": AUTH_URI,
+#     "token_uri": TOKEN_URI,
+#     "auth_provider_x509_cert_url": AUTH_PROVIDER_X509_CERT_URL,
+#     "client_x509_cert_url": CLIENT_X_CERT_URL,
+#     "universe_domain": UNIVERSE_DOMAIN
+# }
 
 
-def detect_text(image, credentials_json):
-    """Detects text in the file."""
+# def detect_text(image, credentials_json):
+#     """Detects text in the file."""
 
-    try:
-        credentials = service_account.Credentials.from_service_account_info(
-            credentials_json
-        )
+#     try:
+#         credentials = service_account.Credentials.from_service_account_info(
+#             credentials_json
+#         )
 
-        client = vision.ImageAnnotatorClient(credentials=credentials)
+#         client = vision.ImageAnnotatorClient(credentials=credentials)
 
-        with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as temp_image:
-            image.save(temp_image.name, optimize=True,
-                       quality=100)
+#         with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as temp_image:
+#             image.save(temp_image.name, optimize=True,
+#                        quality=100)
 
-        image_open = Image.open(temp_image.name)
+#         image_open = Image.open(temp_image.name)
 
-        enhancer = ImageEnhance.Contrast(image_open)
+#         enhancer = ImageEnhance.Contrast(image_open)
 
-        image_contrast = enhancer.enhance(1.3)
+#         image_contrast = enhancer.enhance(1.3)
 
-        image_contrast = image_contrast.resize(
-            (1280, 720),
-            # pylint: disable=E1101
-            Image.BICUBIC)
+#         image_contrast = image_contrast.resize(
+#             (1280, 720),
+#             # pylint: disable=E1101
+#             Image.BICUBIC)
 
-        enhancer_2 = ImageEnhance.Contrast(image_contrast)
+#         enhancer_2 = ImageEnhance.Contrast(image_contrast)
 
-        image_contrast_2 = enhancer_2.enhance(
-            1.3)
+#         image_contrast_2 = enhancer_2.enhance(
+#             1.3)
 
-        image_contrast_2 = image_contrast_2.resize(
-            (1980, 1080),
-            # pylint: disable=E1101
-            Image.BICUBIC)
+#         image_contrast_2 = image_contrast_2.resize(
+#             (1980, 1080),
+#             # pylint: disable=E1101
+#             Image.BICUBIC)
 
-        enhancer_3 = ImageEnhance.Contrast(image_contrast_2)
+#         enhancer_3 = ImageEnhance.Contrast(image_contrast_2)
 
-        image_contrast_3 = enhancer_3.enhance(
-            1.3)
+#         image_contrast_3 = enhancer_3.enhance(
+#             1.3)
 
-        image_contrast_3 = image_contrast_3.resize(
-            (2560, 1440),
-            # pylint: disable=E1101
-            Image.BICUBIC)
+#         image_contrast_3 = image_contrast_3.resize(
+#             (2560, 1440),
+#             # pylint: disable=E1101
+#             Image.BICUBIC)
 
-        with BytesIO() as output:
-            image_contrast_3.save(output, format='PNG')
-            content = output.getvalue()
-            gcp_image = vision.Image(content=content)
-            response = client.text_detection(image=gcp_image)
+#         with BytesIO() as output:
+#             image_contrast_3.save(output, format='PNG')
+#             content = output.getvalue()
+#             gcp_image = vision.Image(content=content)
+#             response = client.text_detection(image=gcp_image)
 
-            print("RESPONSE: ", response.full_text_annotation.text)
-            texto = response.full_text_annotation.text
-            print("Texts:")
+#             print("RESPONSE: ", response.full_text_annotation.text)
+#             texto = response.full_text_annotation.text
+#             print("Texts:")
 
-            return texto
+#             return texto
 
-    except Exception as e:
-        print('Erro na função do Google: ', str(e))
-        return jsonify({'mensagem': str(e)}), 500
+#     except Exception as e:
+#         print('Erro na função do Google: ', str(e))
+#         return jsonify({'mensagem': str(e)}), 500
 
 
 def ocr_image_to_text(image):
