@@ -1,19 +1,21 @@
 # pylint: disable=missing-function-docstring
 """Module providing a function printing python version."""
 import os
+import tempfile
 from dotenv import load_dotenv
 import requests
 from b2sdk._internal.transfer.outbound.upload_source import AbstractUploadSource
 from b2sdk.v2 import B2Api
 from b2sdk.v2 import InMemoryAccountInfo
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, after_this_request,send_file
 import flask_cors
 from controladorArquivo.controlador_arquivos import analisa_text
 from autorization import verificar_autenticacao
 from controladoresUuario.controlador_usuario import cadastrar_usuario, login_usuario, atualizar_usuario
 from contraloador_paciente.controlador import cadastrar_paciente, atualizar_paciente, get_pacientes, excluir_paciente, obter_paciente, buscar_filtro_pacientes, consultar_endereco_por_cep
-from func_banco_dados import get_banco, inserir_exame_no_banco_dados, atualiza_exame_no_banco_dados, deletar_exame_banco_dados, buscar_exames, get_banco_exames
+from func_banco_dados import get_banco, inserir_exame_no_banco_dados, atualiza_exame_no_banco_dados, deletar_exame_banco_dados, buscar_exames, get_banco_exames, get_dados_relatorio
 from io import BytesIO
+from geradorRelatorioPdf import enviar_relatorio_gerado
 
 app = Flask(__name__)
 flask_cors.CORS(app)
@@ -235,6 +237,13 @@ def get_banco_exame_route():
     return get_banco_exames()
 
 
+@app.route('/getBanco/relatorio', methods=['GET'])
+@verificar_autenticacao
+def get_banco_relatorio_route():
+    """Fazer um get dos dados no banco"""
+    return get_dados_relatorio()
+
+
 @app.route('/buscarcep', methods=['GET'])
 def get_buscar_cep():
     """Fazer um get dos dados cep"""
@@ -281,6 +290,27 @@ def rota_atualizar_paciente():
 def deletar_dados_paciente_route(id):
     """DELETAR PACIENTE DO BANCO"""
     return excluir_paciente(id)
+
+@app.route('/gerar_relatorio', methods=['GET'])
+@verificar_autenticacao
+def gerar_relatorio_route():
+    """ENVIAR RELATORIO"""
+
+    with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+        enviar_relatorio_gerado(temp_file)
+        temp_file.seek(0)
+        print(temp_file.read().decode())
+        
+        temp_file.seek(0)
+        @after_this_request
+        def remove_file(response):
+            try:
+                os.remove(temp_file.name)
+            except Exception as e:
+                print(f"Erro ao deletar o arquivo temporário: {e}")
+            return response
+        
+        return send_file(temp_file.name, as_attachment=True, download_name='relatorio.pdf'), 201
 
 
 if __name__ == '__main__':

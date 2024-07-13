@@ -50,91 +50,211 @@ lista_dados = {
         'lista_dados': [],
         'lista_dados_inferior': [],
         'lista_dados_superior': [],
-        'lista_datas': []
+        'lista_datas': [],
+        'dados_referencia': {
+            "maior_valor": 0,
+            "menor_valor": 0,
+            "media": 0,
+            "registro_maior_valor": "0000-00-00",
+            "registro_menor_valor": "0000-00-00",
+            "periodo_analisado": [],
+        },
     },
     'hemoglobina': {
         'lista_dados': [],
         'lista_dados_inferior': [],
         'lista_dados_superior': [],
-        'lista_datas': []
+        'lista_datas': [],
+        'dados_referencia': {
+            "maior_valor": 0,
+            "menor_valor": 0,
+            "media": 0,
+            "registro_maior_valor": "0000-00-00",
+            "registro_menor_valor": "0000-00-00",
+            "periodo_analisado": [],
+        },
     },
     'hematocrito': {
         'lista_dados': [],
         'lista_dados_inferior': [],
         'lista_dados_superior': [],
-        'lista_datas': []
+        'lista_datas': [],
+        'dados_referencia': {
+            "maior_valor": 0,
+            "menor_valor": 0,
+            "media": 0,
+            "registro_maior_valor": "0000-00-00",
+            "registro_menor_valor": "0000-00-00",
+            "periodo_analisado": [],
+        },
     },
     'vcm': {
         'lista_dados': [],
         'lista_dados_inferior': [],
         'lista_dados_superior': [],
-        'lista_datas': []
+        'lista_datas': [],
+        'dados_referencia': {
+            "maior_valor": 0,
+            "menor_valor": 0,
+            "media": 0,
+            "registro_maior_valor": "0000-00-00",
+            "registro_menor_valor": "0000-00-00",
+            "periodo_analisado": [],
+        },
     },
 
     'hcm': {
         'lista_dados': [],
         'lista_dados_inferior': [],
         'lista_dados_superior': [],
-        'lista_datas': []
+        'lista_datas': [],
+        'dados_referencia': {
+            "maior_valor": 0,
+            "menor_valor": 0,
+            "media": 0,
+            "registro_maior_valor": "0000-00-00",
+            "registro_menor_valor": "0000-00-00",
+            "periodo_analisado": [],
+        },
     },
     'chcm': {
         'lista_dados': [],
         'lista_dados_inferior': [],
         'lista_dados_superior': [],
-        'lista_datas': []
+        'lista_datas': [],
+        'dados_referencia': {
+            "maior_valor": 0,
+            "menor_valor": 0,
+            "media": 0,
+            "registro_maior_valor": "0000-00-00",
+            "registro_menor_valor": "0000-00-00",
+            "periodo_analisado": [],
+        },
     },
     'rdw': {
         'lista_dados': [],
         'lista_dados_inferior': [],
         'lista_dados_superior': [],
-        'lista_datas': []
+        'lista_datas': [],
+        'dados_referencia': {
+            "maior_valor": 0,
+            "menor_valor": 0,
+            "media": 0,
+            "registro_maior_valor": "0000-00-00",
+            "registro_menor_valor": "0000-00-00",
+            "periodo_analisado": [],
+        },
     },
     'leucocitos - global': {
         'lista_dados': [],
         'lista_dados_inferior': [],
         'lista_dados_superior': [],
-        'lista_datas': []
+        'lista_datas': [],
+        'dados_referencia': {
+            "maior_valor": 0,
+            "menor_valor": 0,
+            "media": 0,
+            "registro_maior_valor": "0000-00-00",
+            "registro_menor_valor": "0000-00-00",
+            "periodo_analisado": [],
+        },
     },
     'neutrofilos bastonetes': {
         'lista_dados': [],
         'lista_dados_inferior': [],
         'lista_dados_superior': [],
-        'lista_datas': []
+        'lista_datas': [],
+        'dados_referencia': {
+            "maior_valor": 0,
+            "menor_valor": 0,
+            "media": 0,
+            "registro_maior_valor": "0000-00-00",
+            "registro_menor_valor": "0000-00-00",
+            "periodo_analisado": [],
+        },
     },
     'neutrofilos segmentados': {
         'lista_dados': [],
         'lista_dados_inferior': [],
         'lista_dados_superior': [],
-        'lista_datas': []
+        'lista_datas': [],
+        'dados_referencia': {
+            "maior_valor": 0,
+            "menor_valor": 0,
+            "media": 0,
+            "registro_maior_valor": "0000-00-00",
+            "registro_menor_valor": "0000-00-00",
+            "periodo_analisado": [],
+        },
     },
     'linfocitos': {
         'lista_dados': [],
         'lista_dados_inferior': [],
         'lista_dados_superior': [],
-        'lista_datas': []
+        'lista_datas': [],
+        'dados_referencia': {
+            "maior_valor": 0,
+            "menor_valor": 0,
+            "media": 0,
+            "registro_maior_valor": "0000-00-00",
+            "registro_menor_valor": "0000-00-00",
+            "periodo_analisado": [],
+        },
     },
     'monocitos': {
         'lista_dados': [],
         'lista_dados_inferior': [],
         'lista_dados_superior': [],
-        'lista_datas': []
+        'lista_datas': [],
+        'dados_referencia': {
+            "maior_valor": 0,
+            "menor_valor": 0,
+            "media": 0,
+            "registro_maior_valor": "0000-00-00",
+            "registro_menor_valor": "0000-00-00",
+            "periodo_analisado": [],
+        },
     },
     'eosinofilos': {
         'lista_dados': [],
         'lista_dados_inferior': [],
         'lista_dados_superior': [],
-        'lista_datas': []
+        'lista_datas': [],
+        'dados_referencia': {
+            "maior_valor": 0,
+            "menor_valor": 0,
+            "media": 0,
+            "registro_maior_valor": "0000-00-00",
+            "registro_menor_valor": "0000-00-00",
+            "periodo_analisado": [],
+        },
     },
     'basafilos': {
         'lista_dados': [],
         'lista_dados_inferior': [],
         'lista_dados_superior': [],
-        'lista_datas': []
+        'lista_datas': [],
+        'dados_referencia': {
+            "maior_valor": 0,
+            "menor_valor": 0,
+            "media": 0,
+            "registro_maior_valor": "0000-00-00",
+            "registro_menor_valor": "0000-00-00",
+            "periodo_analisado": [],
+        },
     },
     'plaquetas': {
         'lista_dados': [],
         'lista_dados_inferior': [],
         'lista_dados_superior': [],
-        'lista_datas': []
+        'lista_datas': [],
+        'dados_referencia': {
+            "maior_valor": 0,
+            "menor_valor": 0,
+            "media": 0,
+            "registro_maior_valor": "0000-00-00",
+            "registro_menor_valor": "0000-00-00",
+            "periodo_analisado": [],
+        },
     }
 }

@@ -31,7 +31,7 @@ def cadastrar_paciente():
         paciente = {
             'nome': nome,
             'email': email,
-            'data_nascimento': formataData(data_nascimento),
+            'data_nascimento': data_nascimento,
             'sexo': sexo,
             'cpf': cpf,
             'telefone': telefone,
@@ -117,7 +117,7 @@ def atualizar_paciente():
             'id': id,
             'nome': nome,
             'email': email,
-            'data_nascimento': formataData(data_nascimento),
+            'data_nascimento': data_nascimento,
             'sexo': sexo,
             'cpf': cpf,
             'telefone': telefone,
@@ -355,7 +355,7 @@ def buscar_filtro_pacientes():
 
         return jsonify(lista_objeto), 200
 
-    except Exception as e:
+    except Exception:
         # print("Erro ao consultar o banco de dados:", e)
         return jsonify({'error': 'Erro ao consultar o banco de dados'}), 500
     finally:
