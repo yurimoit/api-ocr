@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 import os
+from types import NoneType
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
 from reportlab.lib.units import inch
@@ -64,7 +65,7 @@ class Conexao():
     
     def _normaliza_data(self,_data):
 
-        if _data==0:
+        if _data==0 or _data is None:
             return "---"
         
         lista_indices_data=_data.split('-')
@@ -73,6 +74,12 @@ class Conexao():
 
     def get_data_nascimento(self):
         data=str(self.row[2])
+        print("data", data)
+
+        if data == 'None':
+            self._data_nascimento="---"
+            return self._data_nascimento
+        
         self._data_nascimento=self._normaliza_data(data)
         return self._data_nascimento
     
@@ -117,8 +124,8 @@ class Conexao():
 
 
 class FormatoPDF:
-    def __init__(self, filename) -> None:
-        self.filename = filename
+    def __init__(self) -> None:
+        self.filename = ""
         self.elements = []
         self.data = []
         self.color_1 = 'grey'
@@ -145,8 +152,13 @@ class FormatoPDF:
         ])
 
     def criar_arquivo(self,pdf):
-        pdf = SimpleDocTemplate(self.filename, pagesize=letter)
-        pdf.build(self.elements)
+        try:
+            pdf_gerado = SimpleDocTemplate(pdf, pagesize=letter)
+            pdf_gerado.build(self.elements)
+            return True
+        except Exception:
+            return False    
+        
 
     def criar_titulo(self, nome):
         title = Paragraph(nome, self.styles['Title'])
@@ -209,9 +221,9 @@ def organiza_dados_estatisticos(dados,data5):
 
 
 
-def enviar_relatorio_gerado(pdf):
+def enviar_relatorio_gerado(pdf, id=None):
     """SEM EXPLICAÇÃO"""
-
+    id_usuario = request.usuario[0]
     data5 = [
     ['Hemácias', '', '', '', '', '', ''],
     ['Hemoglobina', '', '', '', '', '', ''],
@@ -232,13 +244,12 @@ def enviar_relatorio_gerado(pdf):
 
     col_widths_4 = [145, 65, 65, 65, 70, 70, 70]
 
-    filename = "relatorio_exames.pdf"
     titulo = "Relatório Exame Sangue<br/>(Hemograma completo)"
 
     try:
-
+        print("id_use --- id",id_usuario, id)
         conexao1 = Conexao()
-        conexao1.select(1, 1)
+        conexao1.select(id_usuario, id)
         dados = conexao1.get_lista_dados()
         nome_paciente=conexao1.get_nome()
         data_nascimento=conexao1.get_data_nascimento()
@@ -252,7 +263,7 @@ def enviar_relatorio_gerado(pdf):
         organiza_dados_estatisticos(dados=dados, data5=data5)
 
 
-        relatorio1 = FormatoPDF(filename)
+        relatorio1 = FormatoPDF()
         relatorio1.criar_titulo(titulo)
         relatorio1.set_data_1(nome_paciente)
         relatorio1.set_data_2(data_nascimento, sexo_paciente)
@@ -265,7 +276,12 @@ def enviar_relatorio_gerado(pdf):
 
         return relatorio1.criar_arquivo(pdf)
         
-    except Exception as e:
-        print("Erro ao gera PDF",str(e))
+    except ValueError:
         return jsonify({'mensagem': "Erro no servidor"}), 500
+    except TypeError:
+        return jsonify({'mensagem': "Erro no servidor"}), 500
+    except Exception as e:
+        print("Erro ao gera PDF--- aqui",str(e))
+        return jsonify({'mensagem': "Erro no servidor"}), 500
+    
     

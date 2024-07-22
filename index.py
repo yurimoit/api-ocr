@@ -296,21 +296,40 @@ def deletar_dados_paciente_route(id):
 def gerar_relatorio_route():
     """ENVIAR RELATORIO"""
 
-    with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-        enviar_relatorio_gerado(temp_file)
-        temp_file.seek(0)
-        print(temp_file.read().decode())
+    try:
         
-        temp_file.seek(0)
-        @after_this_request
-        def remove_file(response):
-            try:
-                os.remove(temp_file.name)
-            except Exception as e:
-                print(f"Erro ao deletar o arquivo temporário: {e}")
-            return response
+        id = request.args.get('id')
+
+        if request.args.get('id') == 'null':
+            id=None
+
+        with tempfile.NamedTemporaryFile(delete=False,  suffix='.pdf') as temp_file:
+            temp_filename = temp_file.name
+            sucesso=enviar_relatorio_gerado(temp_filename, id)
+
+            if not sucesso:
+                raise Exception("Erro ao gerar o PDF")
+
+            with open(temp_filename, 'rb') as f:
+                file_data = f.read()
+                bucket.upload_bytes(file_data, f'relatorios/{os.path.basename(temp_filename)}')
+            
+            @after_this_request
+            def remover(response):
+                try:
+                    if temp_filename:
+                        os.remove(temp_filename)
+                except Exception as e:
+                    print(f"Nao foi possivel excluir: {e}")
+                return response
+            
+            link_gerado=f'https://f005.backblazeb2.com/file/TesteExameSangueOcr/relatorios/{temp_filename}'
+
+            return jsonify({'link': link_gerado}), 201
         
-        return send_file(temp_file.name, as_attachment=True, download_name='relatorio.pdf'), 201
+    except Exception as e:
+        print(f"Erro ao gerar o PDF: {e}")
+        return jsonify({"error": str(e)}), 500  
 
 
 if __name__ == '__main__':
