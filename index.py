@@ -323,7 +323,8 @@ def gerar_relatorio_route():
                     print(f"Nao foi possivel excluir: {e}")
                 return response
             
-            name_file=temp_filename.replave("C:\\Users\\yurim\\AppData\\Local\\Temp\\","").replace("\\Temp\\","").replace("\\temp\\","")
+            # name_file=temp_filename.replave("C:\\Users\\yurim\\AppData\\Local\\Temp\\","").replace("\\Temp\\","").replace("\\temp\\","")
+            name_file=os.path.basename(temp_filename)
             link_gerado=f'https://f005.backblazeb2.com/file/TesteExameSangueOcr/relatorios/{name_file}'
 
             return jsonify({'link': link_gerado}), 201
