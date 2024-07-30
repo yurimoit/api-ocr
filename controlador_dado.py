@@ -453,9 +453,10 @@ def analisa_dados_range_referencia(lista_dados):
                     f'  ---- Referência ----- {referencia_a} ATÉ {referencia_b} ------\n')
 
                 continue
+         
             
-            texto_analise_de_indices=chamar_calculo_paraconsistente(lista_dados)
-            lista_dados_fora_referencia.append(texto_analise_de_indices)
+        texto_analise_de_indices=chamar_calculo_paraconsistente(lista_dados)
+        lista_dados_fora_referencia.append(texto_analise_de_indices)
 
         texto_analizado = '\n'.join(lista_dados_fora_referencia)
 
