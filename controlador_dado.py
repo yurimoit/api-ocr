@@ -393,9 +393,9 @@ def chamar_calculo_paraconsistente( lista_dados, indentificar_valores_pesos=Indi
     valor_incerteza=lista_valores_certo_incerto[1]
     
     grau_certeza=valor_certeza-valor_incerteza
-    abs_certeza=abs(grau_certeza)
+    abs_certeza=round(abs(grau_certeza),2)
     grau_incerteza=(valor_certeza+valor_incerteza)-1
-    abs_incerteza=abs(grau_incerteza)
+    abs_incerteza=round(abs(grau_incerteza),2)
 
     if valor_certeza>=0.6:
         return f"""O sistema identificou que o índices dos glóbulos vermelhos estão elevados \n
