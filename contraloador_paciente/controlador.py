@@ -2,7 +2,6 @@ from flask import request, jsonify
 from conexao_banco_dados import connectar_banco
 from validate_docbr import CPF
 import brazilcep
-from funcao_formata_data import formataData
 
 
 def cadastrar_paciente():

@@ -1,111 +1,26 @@
-import pytesseract
-from PIL import Image, ImageEnhance
-import PyPDF2
+# pylint: disable=missing-function-docstring
+"""Module providing a function printing python version."""
+
+
 import csv
 import os
 import tempfile
-from flask import jsonify
-import docx2txt
 from io import StringIO, BytesIO
+
+import pytesseract
+from PIL import Image, ImageEnhance
+import PyPDF2
+from flask import jsonify
+from dotenv import load_dotenv
+import docx2txt
 import xlrd
+
 from controlador_dado import buscar_dados, corrigir_dados, analisa_dados_range_referencia
 from listas.lista_exame_hemograma import list_captura_dados
 from listas.lista_exame_hemograma import lista_informacoes_buscada
-from dotenv import load_dotenv
 
-# from google.cloud import vision
-# from google.oauth2 import service_account
-# from api_ocr_texto.organizado_arquivos import retunr_lista
 
 load_dotenv()
-
-# TYPE_VALUE = os.getenv('typeValue')
-# PROJECT_ID = os.getenv('projectId')
-# PRIVATE_KEY_ID = os.getenv('privateKeyId')
-# PRIVATE_KEY = os.getenv('privateKey')
-# CLIENT_EMAIL = os.getenv('clientEmail')
-# CLIENT_ID = os.getenv('clientId')
-# AUTH_URI = os.getenv('authUri')
-# TOKEN_URI = os.getenv('tokenUri')
-# AUTH_PROVIDER_X509_CERT_URL = os.getenv('authProviderX509CertUrl')
-# CLIENT_X_CERT_URL = os.getenv('clientX509CertUrl')
-# UNIVERSE_DOMAIN = os.getenv('universeDomain')
-
-# credentials_json = {
-#     "type": TYPE_VALUE,
-#     "project_id": PROJECT_ID,
-#     "private_key_id": PRIVATE_KEY_ID,
-#     "private_key": PRIVATE_KEY.replace("\\n", "\n"),
-#     "client_email": CLIENT_EMAIL,
-#     "client_id": CLIENT_ID,
-#     "auth_uri": AUTH_URI,
-#     "token_uri": TOKEN_URI,
-#     "auth_provider_x509_cert_url": AUTH_PROVIDER_X509_CERT_URL,
-#     "client_x509_cert_url": CLIENT_X_CERT_URL,
-#     "universe_domain": UNIVERSE_DOMAIN
-# }
-
-
-# def detect_text(image, credentials_json):
-#     """Detects text in the file."""
-
-#     try:
-#         credentials = service_account.Credentials.from_service_account_info(
-#             credentials_json
-#         )
-
-#         client = vision.ImageAnnotatorClient(credentials=credentials)
-
-#         with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as temp_image:
-#             image.save(temp_image.name, optimize=True,
-#                        quality=100)
-
-#         image_open = Image.open(temp_image.name)
-
-#         enhancer = ImageEnhance.Contrast(image_open)
-
-#         image_contrast = enhancer.enhance(1.3)
-
-#         image_contrast = image_contrast.resize(
-#             (1280, 720),
-#             # pylint: disable=E1101
-#             Image.BICUBIC)
-
-#         enhancer_2 = ImageEnhance.Contrast(image_contrast)
-
-#         image_contrast_2 = enhancer_2.enhance(
-#             1.3)
-
-#         image_contrast_2 = image_contrast_2.resize(
-#             (1980, 1080),
-#             # pylint: disable=E1101
-#             Image.BICUBIC)
-
-#         enhancer_3 = ImageEnhance.Contrast(image_contrast_2)
-
-#         image_contrast_3 = enhancer_3.enhance(
-#             1.3)
-
-#         image_contrast_3 = image_contrast_3.resize(
-#             (2560, 1440),
-#             # pylint: disable=E1101
-#             Image.BICUBIC)
-
-#         with BytesIO() as output:
-#             image_contrast_3.save(output, format='PNG')
-#             content = output.getvalue()
-#             gcp_image = vision.Image(content=content)
-#             response = client.text_detection(image=gcp_image)
-
-#             print("RESPONSE: ", response.full_text_annotation.text)
-#             texto = response.full_text_annotation.text
-#             print("Texts:")
-
-#             return texto
-
-#     except Exception as e:
-#         print('Erro na função do Google: ', str(e))
-#         return jsonify({'mensagem': str(e)}), 500
 
 
 def ocr_image_to_text(image):
@@ -147,10 +62,8 @@ def ocr_pdf_to_text(pdf_path):
         pdf_reader = PyPDF2.PdfReader(pdf_path)
         for page in pdf_reader.pages:
             text += page.extract_text()
-        # print(text)
         return text
-    except Exception as e:
-        print(f"Erro ao extrair texto do arquivo: {e}")
+    except Exception:
         return jsonify({'mensagem': "Erro no servidor"}), 500
 
 
@@ -163,7 +76,6 @@ def read_text_from_txt(file_bytes):
                 text += line.decode('utf-8')
         return text
     except Exception:
-        # print(f"Erro ao extrair texto do arquivo: {e}")
         return jsonify({'mensagem': "Erro no servidor"}), 500
 
 
@@ -173,7 +85,6 @@ def read_text_from_docx(docx_file):
         text = docx2txt.process(docx_file)
         return text
     except Exception:
-        # print(f"Erro ao extrair texto do arquivo: {e}")
         return jsonify({'mensagem': "Erro no servidor"}), 500
 
 
@@ -182,8 +93,8 @@ def read_text_from_csv(file_text):
     try:
         text = ""
 
-        content = file_text.decode()  # Converte bytes para string
-        file = StringIO(content)  # Cria um objeto de fluxo de texto em memória
+        content = file_text.decode()  
+        file = StringIO(content) 
         csv_data = csv.reader(file, delimiter=",")
 
         for row in csv_data:
@@ -198,20 +109,16 @@ def read_text_from_xls(file_content):
     """Extrai o texto do arquivo .xls com a biblioteca xlrd"""
 
     try:
-        # Abre o arquivo XLS usando xlrd
         workbook = xlrd.open_workbook(file_contents=file_content)
 
-        # Acesse a primeira planilha (pode ajustar conforme necessário)
         sheet = workbook.sheet_by_index(0)
 
-        # Leia os dados da planilha e converta para uma string
         text = ""
         for row in range(sheet.nrows):
             text += ",".join(str(cell.value) for cell in sheet.row(row)) + "\n"
 
         return text
-    except Exception as e:
-        print(f"Erro ao extrair texto do arquivo: {e}")
+    except Exception:
         return jsonify({'mensagem': "Erro no servidor"}), 500
 
 
@@ -222,16 +129,6 @@ def analisa_text(file_extension, response_content):
         if file_extension in ('.png', '.jpg', '.jpeg'):
             image = Image.open(BytesIO(response_content))
             ocr_text = ocr_image_to_text(image)
-            # ocr_text = detect_text(image, credentials_json)
-
-            # if ocr_text:
-
-            #     lista_corrigida = retunr_lista(ocr_text)
-
-            #     nota = analisa_dados_range_referencia(
-            #         lista_corrigida)
-
-            # return [lista_corrigida, nota]
 
         elif file_extension == '.pdf':
             ocr_text = ocr_pdf_to_text(BytesIO(response_content))
@@ -257,6 +154,5 @@ def analisa_text(file_extension, response_content):
 
         return [lista_corrigida, nota]
 
-    except Exception as e:
-        print(f"Erro ao extrair texto do arquivo: {e}")
+    except Exception:
         return jsonify({'mensagem': "Erro no servidor"}), 500

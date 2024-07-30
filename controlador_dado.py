@@ -1,3 +1,5 @@
+# pylint: disable=missing-function-docstring
+
 """Bibliotecas para uso"""
 import re
 import copy
@@ -176,7 +178,7 @@ def buscar_dados(texto_gerado, lista, list_captura_dados):
 
 
 def corrigir_dados(lista_dados):
-    """ """
+    """CORRIGIR DADOS """
 
     try:
         for dicionario in lista_dados:
@@ -245,10 +247,177 @@ def corrigir_dados(lista_dados):
     except Exception as e:
         print(f"Erro ao corrigir o dado: {e}")
         return jsonify({'mensagem': "Erro no servidor"}), 500
+    
+class ClassesValores:
+    """Classe 1"""
+
+    def __init__(self) -> None:
+        self._p1=0.9 
+        self._p2=0.8 
+        self._p3=0.7 
+        self._p4=0.7 
+        self._p5=0.6 
+        self._p6=0.5 
+
+
+
+
+class IndicadoresValoresPesos(ClassesValores):
+    """ Class"""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.nome=""
+        self.valor=0.0
+        self.referencia=0.0
+        self._hemacias=[0,0]
+        self._hemoglobina=[0,0]
+        self._hematocrito=[0,0]
+        self._leucocitos_global=[0,0]
+        self._neutrofilos_segmentados=[0,0]
+        self._plaquetas=[0,0]
+
+    def verificar_alteracao_indicadores(self)->bool:
+
+        if self.valor>self.referencia:
+            return True
+        
+        return False
+    
+
+    def atribuir_pesos_indicadores(self, valor_p):
+        valor_certeza=valor_p
+        valor_incerteza=0.0
+        if self.verificar_alteracao_indicadores():
+            lista_valores=[valor_certeza, valor_incerteza]
+            return lista_valores
+
+        return [valor_incerteza, valor_certeza]
+
+
+    def atribuir_valor(self, nome, valor, referencia)->None:
+        self.nome=nome
+        self.valor=valor
+        self.referencia=referencia
+
+        match self.nome:
+            case "hematocrito":
+                self._hematocrito=self.atribuir_pesos_indicadores(self._p1)
+                return   
+            case "hemoglobina":
+                self._hemoglobina=self.atribuir_pesos_indicadores(self._p2) 
+                return  
+            case "hemacias":
+                self._hemacias=self.atribuir_pesos_indicadores(self._p3)
+                return      
+            case "leucocitos - global":
+                self._leucocitos_global=self.atribuir_pesos_indicadores(self._p4)
+                return      
+            case "neutrofilos segmentados":
+                self._neutrofilos_segmentados=self.atribuir_pesos_indicadores(self._p5)
+                return      
+            case "plaquetas":
+                self._plaquetas=self.atribuir_pesos_indicadores(self._p6)
+                return      
+            case _:
+                return  None  
+            
+    def valor_max_g2(self):
+        lista_valor_maior=[]
+        lista_valor_maior.append(self._hemacias[0])        
+        lista_valor_maior.append(self._hemoglobina[0]) 
+
+        lista_valor_menor=[]
+        lista_valor_menor.append(self._hemacias[1])        
+        lista_valor_menor.append(self._hemoglobina[1])              
+       
+        maior_valor=max(lista_valor_maior)
+        menor_valor=min(lista_valor_menor)
+
+        return [maior_valor, menor_valor]      
+     
+    def valor_max_g3(self):
+        lista_valor_maior=[]
+        lista_valor_maior.append(self._leucocitos_global[0])        
+        lista_valor_maior.append(self._neutrofilos_segmentados[0]) 
+
+        lista_valor_menor=[]
+        lista_valor_menor.append(self._leucocitos_global[1])        
+        lista_valor_menor.append(self._neutrofilos_segmentados[1])              
+       
+        maior_valor=max(lista_valor_maior)
+        menor_valor=min(lista_valor_menor)
+
+        return [maior_valor, menor_valor]       
+
+            
+    def calculo_logica_paraconsistente_anotada(self):
+        g1=self._hematocrito
+        g4=self._plaquetas
+        g3=self.valor_max_g3()
+        g2=self.valor_max_g2()
+
+        m1_min=[min(g1[0],g2[0]), max(g1[1], g2[1])]
+        m2_min=[min(g3[0], g4[0]), max(g3[1], g4[1])]
+
+        valor_final_max=[max(m1_min[0], m2_min[0]), min(m1_min[1], m2_min[1])]
+
+        return valor_final_max
+
+
+
+def chamar_calculo_paraconsistente( lista_dados, indentificar_valores_pesos=IndicadoresValoresPesos):
+
+    valores=indentificar_valores_pesos()
+
+    for dicionario in lista_dados:
+        referencia = 'valorPR'
+        # referencia_a = ''
+        referencia_b = ''
+
+        if 'mm3' in list(dicionario.keys()):
+            referencia = 'mm3'
+
+        if '--' in list(dicionario.values()):
+            continue
+
+        # referencia_a = float(dicionario['valoRA'])
+        referencia_b = float(dicionario['valorB'])
+        referencia_valor = float(dicionario[referencia])
+        nome=dicionario["nome"]
+        valores.atribuir_valor(nome, referencia_valor, referencia_b)
+
+    lista_valores_certo_incerto=valores.calculo_logica_paraconsistente_anotada()
+
+    valor_certeza=lista_valores_certo_incerto[0]
+
+    if valor_certeza>0.5:
+        return f"""O sistema identificou que o índices dos glóbulos vermelhos estão elevados \n
+                  com bases nos dados do exame, considerando o grau de certeza de {valor_certeza}> 50%, considerado verdadeiro \n
+                  , sugerimos que seja uma avaliação clínica mais detalha e exames adicionais \n
+                  \n
+                  Sugestões:\n
+                    Verificar exames anterios ou repetir o exames em 1 mêS.\n
+                    Avaliar possiveis sintomas.
+
+                    
+                  Exame: Uma possivél mutação no gene (JKA2) e \n
+                  Avaliação de Sintomas 
+
+                  \n
+                  Suspeitas: Policitemia vera**
+                  \n
+                  observação: ISSO NÃO SE TRATA DE UM DIAGNÓSTICO CABE AO SEU MÉDICO AVALIAR SEU QUADRO CLÍNICO.
+            """ 
+
+    return ""   
+
+
+        
+
 
 
 def analisa_dados_range_referencia(lista_dados):
-    """"""
 
     try:
         lista_dados_fora_referencia = []
@@ -284,6 +453,9 @@ def analisa_dados_range_referencia(lista_dados):
                     f'  ---- Referência ----- {referencia_a} ATÉ {referencia_b} ------\n')
 
                 continue
+            
+            texto_analise_de_indices=chamar_calculo_paraconsistente(lista_dados)
+            lista_dados_fora_referencia.append(texto_analise_de_indices)
 
         texto_analizado = '\n'.join(lista_dados_fora_referencia)
 

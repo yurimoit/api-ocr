@@ -1,21 +1,32 @@
 # pylint: disable=missing-function-docstring
 """Module providing a function printing python version."""
+
 import os
 import tempfile
+from io import BytesIO
+import flask_cors
+
 from dotenv import load_dotenv
 import requests
 from b2sdk._internal.transfer.outbound.upload_source import AbstractUploadSource
 from b2sdk.v2 import B2Api
 from b2sdk.v2 import InMemoryAccountInfo
-from flask import Flask, jsonify, request, after_this_request,send_file
-import flask_cors
-from controladorArquivo.controlador_arquivos import analisa_text
+from flask import Flask, jsonify, request, after_this_request
+
+
 from autorization import verificar_autenticacao
-from controladoresUuario.controlador_usuario import cadastrar_usuario, login_usuario, atualizar_usuario
-from contraloador_paciente.controlador import cadastrar_paciente, atualizar_paciente, get_pacientes, excluir_paciente, obter_paciente, buscar_filtro_pacientes, consultar_endereco_por_cep
-from func_banco_dados import get_banco, inserir_exame_no_banco_dados, atualiza_exame_no_banco_dados, deletar_exame_banco_dados, buscar_exames, get_banco_exames, get_dados_relatorio
-from io import BytesIO
 from geradorRelatorioPdf import enviar_relatorio_gerado
+from controladorArquivo.controlador_arquivos import analisa_text
+from func_banco_dados import get_banco, inserir_exame_no_banco_dados, atualiza_exame_no_banco_dados
+from func_banco_dados import deletar_exame_banco_dados, buscar_exames, get_banco_exames
+from func_banco_dados import  get_dados_relatorio
+from controladoresUuario.controlador_usuario import cadastrar_usuario, login_usuario
+from controladoresUuario.controlador_usuario import atualizar_usuario
+from contraloador_paciente.controlador import cadastrar_paciente, atualizar_paciente, get_pacientes
+from contraloador_paciente.controlador import excluir_paciente, obter_paciente
+from contraloador_paciente.controlador import  buscar_filtro_pacientes, consultar_endereco_por_cep
+
+
 
 app = Flask(__name__)
 flask_cors.CORS(app)
@@ -43,18 +54,14 @@ PASSWORD = os.environ.get('password')
 
 PORT = os.getenv('PORT')
 
-# Path personalizado para o arquivo de informações da conta
 ACCOUNT_INFO_PATH = '/.b2_account_info'
 
 info = InMemoryAccountInfo()
-# Criar uma instância do B2Api com informações da conta em memória
 b2_api = B2Api(info)
-# Definir o caminho personalizado para o arquivo de informações da conta
 b2_api.account_info._config_file = ACCOUNT_INFO_PATH
 
 
 b2_api.authorize_account("production", KEY_ID, KEY)
-# Obter a instância do bucket
 bucket = b2_api.get_bucket_by_name(NAME)
 
 
@@ -153,13 +160,12 @@ def get_string():
 
 
 @app.route('/listaFiles', methods=['GET'])
-def getLista():
-    """Get lista"""
+def get_lista():
+    """GET LISTA"""
     try:
         # Listar os objetos no bucket
         file_versions = bucket.ls()
 
-        # Exibir os nomes dos objetos no bucket
         file_names = [
             f'https://f005.backblazeb2.com/file/TesteExameSangueOcr/{file_version_tuple[0].file_name}' for file_version_tuple in file_versions]
 
@@ -323,7 +329,6 @@ def gerar_relatorio_route():
                     print(f"Nao foi possivel excluir: {e}")
                 return response
             
-            # name_file=temp_filename.replave("C:\\Users\\yurim\\AppData\\Local\\Temp\\","").replace("\\Temp\\","").replace("\\temp\\","")
             name_file=os.path.basename(temp_filename)
             link_gerado=f'https://f005.backblazeb2.com/file/TesteExameSangueOcr/relatorios/{name_file}'
 
