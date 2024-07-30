@@ -390,14 +390,15 @@ def chamar_calculo_paraconsistente( lista_dados, indentificar_valores_pesos=Indi
     lista_valores_certo_incerto=valores.calculo_logica_paraconsistente_anotada()
 
     valor_certeza=lista_valores_certo_incerto[0]
+    valor_incerteza=lista_valores_certo_incerto[1]
 
     if valor_certeza>=0.6:
         return f"""O sistema identificou que o índices dos glóbulos vermelhos estão elevados \n
-                  com bases nos dados do exame, considerando o grau de certeza de {valor_certeza*100}%>= 60%, considerado verdadeiro \n
-                  , sugerimos que seja feita uma avaliação clínica mais detalha e exames adicionais \n
+                  com bases nos dados do exame, considerando o grau de certeza de {valor_certeza*100}%, considerado verdadeiro \n
+                  , e {valor_incerteza*100}% de incerteza.\n Sugerimos que seja feita uma avaliação clínica mais detalha e exames adicionais.\n
                   \n
                   Sugestões:\n
-                    Verificar exames anterios ou repetir o exames em 1 mêS.\n
+                    Verificar exames anterios ou repetir o exame em 1 Mês.\n
                     Avaliar possiveis sintomas:
                             - Fraqueza
                             - Cansaço
@@ -409,16 +410,16 @@ def chamar_calculo_paraconsistente( lista_dados, indentificar_valores_pesos=Indi
 
 
                     
-                  Exame: Uma possivél mutação no gene (JKA2) e \n
-                  Avaliação de Sintomas novamente. 
+                  Novo exame: Para identificar uma possivél mutação no gene (JKA2). \n
+                  Avaliar novamente os sisntomas. 
 
                   \n
-                  Suspeitas: Policitemia vera**
+                  Suspeitas: Policitemia vera** Ou possibilidades**
                   \n
-                  observação: ISSO NÃO SE TRATA DE UM DIAGNÓSTICO CABE AO SEU\n MÉDICO AVALIAR SEU QUADRO CLÍNICO.
+                  Observação: ISSO NÃO SE TRATA DE UM DIAGNÓSTICO CABE AO SEU\n MÉDICO AVALIAR SEU QUADRO CLÍNICO.
             """ 
 
-    return ""   
+    return f"Valor gerado:{valor_certeza, valor_incerteza}"   
 
 
         
