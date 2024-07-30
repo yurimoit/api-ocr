@@ -398,16 +398,24 @@ def chamar_calculo_paraconsistente( lista_dados, indentificar_valores_pesos=Indi
                   \n
                   Sugestões:\n
                     Verificar exames anterios ou repetir o exames em 1 mêS.\n
-                    Avaliar possiveis sintomas.
+                    Avaliar possiveis sintomas:
+                            - Fraqueza
+                            - Cansaço
+                            - Dor de cabeça
+                            - Tontura ou sensação de desmaio iminente
+                            - Faltar de ar
+                            - Suor noturno
+                            - Coceiras após banho de chuveiro
+
 
                     
                   Exame: Uma possivél mutação no gene (JKA2) e \n
-                  Avaliação de Sintomas 
+                  Avaliação de Sintomas novamente. 
 
                   \n
                   Suspeitas: Policitemia vera**
                   \n
-                  observação: ISSO NÃO SE TRATA DE UM DIAGNÓSTICO CABE AO SEU MÉDICO AVALIAR SEU QUADRO CLÍNICO.
+                  observação: ISSO NÃO SE TRATA DE UM DIAGNÓSTICO CABE AO SEU\n MÉDICO AVALIAR SEU QUADRO CLÍNICO.
             """ 
 
     return ""   
