@@ -391,12 +391,17 @@ def chamar_calculo_paraconsistente( lista_dados, indentificar_valores_pesos=Indi
 
     valor_certeza=lista_valores_certo_incerto[0]
     valor_incerteza=lista_valores_certo_incerto[1]
+    
+    grau_certeza=valor_certeza-valor_incerteza
+    abs_certeza=abs(grau_certeza)
+    grau_incerteza=(valor_certeza+valor_incerteza)-1
+    abs_incerteza=abs(grau_incerteza)
 
     if valor_certeza>=0.6:
         return f"""O sistema identificou que o índices dos glóbulos vermelhos estão elevados \n
-                  com bases nos dados do exame, considerando o grau de certeza de {valor_certeza*100}%, considerado verdadeiro \n
-                  , e {valor_incerteza*100}% de incerteza.\n Sugerimos que seja feita uma avaliação clínica mais detalha e exames adicionais.\n
-                  \n
+                  com bases nos dados do exame, considerando o grau de certeza de {abs_certeza*100}%, considerado verdadeiro
+                  , e {abs_incerteza*100}% de incerteza.\n Sugerimos que seja feita uma avaliação clínica mais detalha e exames adicionais.\n
+                  
                   Sugestões:\n
                     Verificar exames anterios ou repetir o exame em 1 Mês.\n
                     Avaliar possiveis sintomas:
