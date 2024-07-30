@@ -391,10 +391,10 @@ def chamar_calculo_paraconsistente( lista_dados, indentificar_valores_pesos=Indi
 
     valor_certeza=lista_valores_certo_incerto[0]
 
-    if valor_certeza>0.5:
+    if valor_certeza>=0.6:
         return f"""O sistema identificou que o índices dos glóbulos vermelhos estão elevados \n
-                  com bases nos dados do exame, considerando o grau de certeza de {valor_certeza}> 50%, considerado verdadeiro \n
-                  , sugerimos que seja uma avaliação clínica mais detalha e exames adicionais \n
+                  com bases nos dados do exame, considerando o grau de certeza de {valor_certeza*100}%>= 60%, considerado verdadeiro \n
+                  , sugerimos que seja feita uma avaliação clínica mais detalha e exames adicionais \n
                   \n
                   Sugestões:\n
                     Verificar exames anterios ou repetir o exames em 1 mêS.\n
@@ -453,8 +453,8 @@ def analisa_dados_range_referencia(lista_dados):
                     f'  ---- Referência ----- {referencia_a} ATÉ {referencia_b} ------\n')
 
                 continue
-         
-            
+
+
         texto_analise_de_indices=chamar_calculo_paraconsistente(lista_dados)
         lista_dados_fora_referencia.append(texto_analise_de_indices)
 
