@@ -149,10 +149,10 @@ def analisa_text(file_extension, response_content):
 
             lista_corrigida = corrigir_dados(lista_informacao_text)
 
-            nota = analisa_dados_range_referencia(
+            lista_notas = analisa_dados_range_referencia(
                 lista_corrigida)
 
-        return [lista_corrigida, nota]
+        return [lista_corrigida, lista_notas[0]]
 
     except Exception:
         return jsonify({'mensagem': "Erro no servidor"}), 500

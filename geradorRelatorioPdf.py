@@ -39,16 +39,29 @@ class Conexao():
         if parametro_2:
             self.parametros = (parametro_1, parametro_2,)
 
-        with self.conn.cursor() as cursor:
-            if parametro_2:
-                cursor.execute(self._comandoSQL_2, self.parametros)
-            else:
-                cursor.execute(self._comandoSQL_1, self.parametros)
-            self.conn.commit()
+        try:
+            with self.conn.cursor() as cursor:
+                if parametro_2:
+                    cursor.execute(self._comandoSQL_2, self.parametros)
+                else:
+                    cursor.execute(self._comandoSQL_1, self.parametros)
+                self.conn.commit()
 
-            self.row = cursor.fetchone()
-            print()
-        self.conn.close()
+                self.row = cursor.fetchone()
+                    
+            self.conn.close()
+
+            if not self.row:
+                raise ValueError("")
+            
+        except Exception:
+            return jsonify({'mensagem': "Erro no servidor"}), 500
+
+
+    def verifica_status_resposta_bd(self):
+        if self.row is None:
+            return False
+        return True
 
     def vizualizar_resposta(self):
         for item in self.row:
@@ -65,7 +78,7 @@ class Conexao():
     
     def _normaliza_data(self,_data):
 
-        if _data==0 or _data is None:
+        if (_data is None) or (_data=="0"):
             return "---"
         
         lista_indices_data=_data.split('-')
@@ -74,9 +87,8 @@ class Conexao():
 
     def get_data_nascimento(self):
         data=str(self.row[2])
-        print("data", data)
 
-        if data == 'None':
+        if (data == 'None') or (not data) or (data=="0"):
             self._data_nascimento="---"
             return self._data_nascimento
         
@@ -247,21 +259,23 @@ def enviar_relatorio_gerado(pdf, id=None):
     titulo = "Relatório Exame Sangue<br/>(Hemograma completo)"
 
     try:
-        print("id_use --- id",id_usuario, id)
         conexao1 = Conexao()
         conexao1.select(id_usuario, id)
+        status=conexao1.verifica_status_resposta_bd()
+        
+        if not status:
+            return None
+
         dados = conexao1.get_lista_dados()
-        nome_paciente=conexao1.get_nome()
+        nome_paciente=conexao1.get_nome() 
         data_nascimento=conexao1.get_data_nascimento()
         sexo_paciente=conexao1.get_sexo_paciente()
         data_1=conexao1.get_data_1()
         data_2=conexao1.get_data_2()
         data_3=conexao1.get_data_3()
         lista_registros=conexao1.get_periodo_analisado()
-
-
+        
         organiza_dados_estatisticos(dados=dados, data5=data5)
-
 
         relatorio1 = FormatoPDF()
         relatorio1.criar_titulo(titulo)

@@ -1,5 +1,11 @@
+# pylint: disable=missing-function-docstring
+"""Module providing a function printing python version."""
+
+from __future__ import annotations
+
 import copy
 from funcao_formata_data import determina_data_maior_menor
+from funcao_formata_data import  ordenar_valores_p_data
 
 
 def funcao_or_dados(lista, exame, data, nome_exame):
@@ -110,6 +116,8 @@ def valor_max_min_med(lista_dados: dict):
         print("Error valor maz e min: ", e)
 
 
+
+
 def verifica_lista(lista):
     """SEM EXPLICAÇÃO"""
 
@@ -141,16 +149,19 @@ def ordena_novo_json(json_dados):
         item = list(item)
 
         if verifica:
-            data_1=verifica_lista(item[1]['lista_datas'])[0]
-            data_2=verifica_lista(item[1]['lista_datas'])[1]
-            data_3=verifica_lista(item[1]['lista_datas'])[2]
+            lista_datas, lista_valores=ordenar_valores_p_data(lista_data=item[1]['lista_datas'], lista_valores=item[1]['lista_dados'])
+
+            data_1=verifica_lista(lista_datas)[0]
+            data_2=verifica_lista(lista_datas)[1]
+            data_3=verifica_lista(lista_datas)[2]
             data_primeiro_registro=item[1]['dados_referencia']["periodo_analisado"][0]
             data_ultimo_registro=item[1]['dados_referencia']["periodo_analisado"][1]
             verifica=False
 
+
         novo_json_dados[f'{item[0]}'] = {
-            'lista_dados': verifica_lista(item[1]['lista_dados']),
-            'lista_datas': verifica_lista(item[1]['lista_datas']),
+            'lista_dados': verifica_lista(lista_valores),
+            'lista_datas': verifica_lista(lista_datas),
             'dados_referencia': {
                 "maior_valor": item[1]['dados_referencia']["maior_valor"],
                 "menor_valor":  item[1]['dados_referencia']["menor_valor"],

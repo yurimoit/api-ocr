@@ -25,6 +25,7 @@ from controladoresUuario.controlador_usuario import atualizar_usuario
 from contraloador_paciente.controlador import cadastrar_paciente, atualizar_paciente, get_pacientes
 from contraloador_paciente.controlador import excluir_paciente, obter_paciente
 from contraloador_paciente.controlador import  buscar_filtro_pacientes, consultar_endereco_por_cep
+from controlado_dados_paranalisador import get_dados_paranalisador
 
 
 
@@ -296,6 +297,11 @@ def rota_atualizar_paciente():
 def deletar_dados_paciente_route(id):
     """DELETAR PACIENTE DO BANCO"""
     return excluir_paciente(id)
+
+@app.route('/gerar/dados_paranalisador', methods=['GET'])
+@verificar_autenticacao
+def gerar_dados_paranalisador():
+    return get_dados_paranalisador()
 
 @app.route('/gerar_relatorio', methods=['GET'])
 @verificar_autenticacao

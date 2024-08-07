@@ -363,6 +363,8 @@ class IndicadoresValoresPesos(ClassesValores):
         valor_final_max=[max(m1_min[0], m2_min[0]), min(m1_min[1], m2_min[1])]
 
         return valor_final_max
+    
+
 
 
 
@@ -397,8 +399,7 @@ def chamar_calculo_paraconsistente( lista_dados, indentificar_valores_pesos=Indi
     grau_incerteza=(valor_certeza+valor_incerteza)-1
     abs_incerteza=round(abs(grau_incerteza),2)
 
-    if valor_certeza>=0.6:
-        return f"""O sistema identificou que o índices dos glóbulos vermelhos estão elevados \n
+    texto=f"""O sistema identificou que o índices dos glóbulos vermelhos estão elevados \n
                   com bases nos dados do exame, considerando o grau de certeza de {abs_certeza*100}%, considerado verdadeiro
                   , e {abs_incerteza*100}% de incerteza.\n Sugerimos que seja feita uma avaliação clínica mais detalha e exames adicionais.\n
                   
@@ -423,8 +424,13 @@ def chamar_calculo_paraconsistente( lista_dados, indentificar_valores_pesos=Indi
                   \n
                   Observação: ISSO NÃO SE TRATA DE UM DIAGNÓSTICO CABE AO SEU\n MÉDICO AVALIAR SEU QUADRO CLÍNICO.
             """ 
+    
+    texto_2=f"Valor gerado:{valor_certeza, valor_incerteza}"  
 
-    return f"Valor gerado:{valor_certeza, valor_incerteza}"   
+    if valor_certeza>=0.6:
+        return [texto, [valor_certeza, valor_incerteza]]
+
+    return [texto_2, [valor_certeza, valor_incerteza]] 
 
 
         
@@ -469,12 +475,16 @@ def analisa_dados_range_referencia(lista_dados):
                 continue
 
 
-        texto_analise_de_indices=chamar_calculo_paraconsistente(lista_dados)
+        analise_de_indices=chamar_calculo_paraconsistente(lista_dados)
+        texto_analise_de_indices=analise_de_indices[0]
         lista_dados_fora_referencia.append(texto_analise_de_indices)
+        valor_certeza=analise_de_indices[1][0]
+        valor_incerteza=analise_de_indices[1][1]
+        lista_valores=[valor_certeza, valor_incerteza]
 
         texto_analizado = '\n'.join(lista_dados_fora_referencia)
 
-        return texto_analizado
+        return [texto_analizado, lista_valores]
     except Exception as e:
         print(f"Erro no controlado de referencias: {str(e)}")
         return jsonify({'mensagem': "Erro no servidor"}), 500

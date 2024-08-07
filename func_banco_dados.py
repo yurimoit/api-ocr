@@ -1,3 +1,4 @@
+# pylint: disable=missing-function-docstring
 """Module providing a function printing python version."""
 from __future__ import annotations
 
@@ -6,9 +7,19 @@ import copy
 import json
 from flask import request, jsonify
 from listas.lista_exame_hemograma import lista_dados
-from listas.controlado_dados_lista import get_dados_info, funcao_or_dados, ordena_novo_json, valor_max_min_med
+
+from listas.controlado_dados_lista import get_dados_info, funcao_or_dados
 from conexao_banco_dados import connectar_banco
 from controlador_dado import analisa_dados_range_referencia
+from controlado_dados_paranalisador import inserir_dados_paranalisador
+from controlado_dados_paranalisador import  atualizar_dados_paranalisador
+from controlado_dados_paranalisador import deletar_dados_paranalisador
+from controlador_relatorios import atualiza_relatorio_no_banco_dados
+from controlador_relatorios import inserir_relatorio_no_banco_dados
+from controlador_relatorios import deletar_relatorio_no_banco_dados
+from controlador_relatorios import get_banco_exames_exclusiva
+from funcao_formata_data import ordenar_dados_lista
+
 
 
 def inserir_exame_no_banco_dados():
@@ -28,81 +39,45 @@ def inserir_exame_no_banco_dados():
     cursor = None
     conn = None
 
+    if id_paciente == 'null':
+        id_paciente = None
+
     try:
 
         json_dados = []
         json_dados = json.dumps(dados_exame['lista_dados'])
-        dados_exame['observacao'] = analisa_dados_range_referencia(
-            dados_exame['lista_dados'])
+        dados_exame['observacao'] = analisa_dados_range_referencia(dados_exame['lista_dados'])
+        nota=dados_exame['observacao'][0]
+        lista_valores_cr_in=dados_exame['observacao'][1]
         data_atual = dados_exame['data_exame']
 
         conn = connectar_banco()
 
         with conn.cursor() as cursor:
             if id_paciente:
-                cursor.execute("INSERT INTO files (nome_exame, url_exame, lista_dados, observacao, data_exame, id_usuario,id_paciente) VALUES (%s, %s,%s,%s,%s,%s,%s)",
-                               (dados_exame['nome_exame'], dados_exame['url_exame'], json_dados, dados_exame['observacao'], data_atual, id_usuario,  id_paciente))
+                cursor.execute("INSERT INTO files (nome_exame, url_exame, lista_dados, observacao, data_exame, id_usuario,id_paciente) VALUES (%s, %s,%s,%s,%s,%s,%s) RETURNING id",
+                               (dados_exame['nome_exame'], dados_exame['url_exame'], json_dados, nota, data_atual, id_usuario,  id_paciente))
+                
             else:
-                cursor.execute("INSERT INTO files (nome_exame, url_exame, lista_dados, observacao, data_exame, id_usuario) VALUES (%s, %s,%s,%s,%s,%s)",
-                               (dados_exame['nome_exame'], dados_exame['url_exame'], json_dados, dados_exame['observacao'], data_atual, id_usuario))
-
+                cursor.execute("INSERT INTO files (nome_exame, url_exame, lista_dados, observacao, data_exame, id_usuario) VALUES (%s, %s,%s,%s,%s,%s) RETURNING id",
+                               (dados_exame['nome_exame'], dados_exame['url_exame'], json_dados, nota, data_atual, id_usuario))
+                
+            id_exame=cursor.fetchone()[0]
             conn.commit()
 
+            if id_exame:
+                inserir_dados_paranalisador(lista_valores_cr_in, data_atual, id_paciente, id_exame)
+
+            
+
         dados = get_banco_exames_exclusiva(id_paciente)
-        novos_dados = ordena_novo_json(dados[0])
-        data_1=novos_dados["data_1"]
-        data_2=novos_dados["data_2"]
-        data_3=novos_dados["data_3"]
-        data_primeiro_registro=novos_dados["data_primeiro_registro"]
-        data_ultimo_registro=novos_dados["data_ultimo_registro"]
 
-        print("Novos dados: ", novos_dados)
-
-        novos_json_dados = json.dumps(novos_dados["dados_estatistico"])
-
-        if dados[1] > 1090:
-            with conn.cursor() as cursor:
-                if id_paciente:
-                    cursor.execute(
-                        """UPDATE relatorios
-                        SET lista_dados=%s,  data_1=%s, data_2=%s, data_3=%s, data_primeiro_registro=%s, data_ultimo_registro=%s
-                        WHERE id_usuario=%s and id_paciente=%s
-                        RETURNING *;""",
-                        (novos_json_dados, data_1, data_2, data_3, data_primeiro_registro, data_ultimo_registro, id_usuario, id_paciente))
-                    conn.commit()
-                else:
-                    cursor.execute(
-                        """UPDATE relatorios
-                        SET lista_dados=%s, data_1=%s, data_2=%s, data_3=%s, data_primeiro_registro=%s, data_ultimo_registro=%s
-                        WHERE id_usuario=%s
-                        RETURNING *;""",
-                        (novos_json_dados, data_1, data_2, data_3, data_primeiro_registro, data_ultimo_registro, id_usuario))
-                    conn.commit()
+        if dados[1] > 1:
+            atualiza_relatorio_no_banco_dados(id_paciente)
 
             return jsonify({'mensagem': "Inserção bem-sucedida no banco de dados."}), 201
 
-        with conn.cursor() as cursor:
-            if id_paciente:
-                cursor.execute(
-                    """INSERT INTO relatorios
-                    (nome_paciente, data_nascimento, sexo, data_1, data_2, data_3, data_primeiro_registro, data_ultimo_registro,
-                     lista_dados, id_usuario, id_paciente)
-                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
-                    """,
-                    (nome_paciente, data_nascimento, sexo,
-                    data_1, data_2, data_3, data_primeiro_registro,
-                    data_ultimo_registro, novos_json_dados, id_usuario, id_paciente))
-                conn.commit()
-            else:
-                cursor.execute(
-                    """INSERT INTO relatorios
-                    (nome_paciente, data_nascimento, sexo, data_1, data_2, data_3, data_primeiro_registro, data_ultimo_registro, lista_dados, id_usuario)
-                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
-                    """,
-                    (nome_paciente, data_nascimento, sexo,
-                     data_1, data_2, data_3, data_primeiro_registro,
-                    data_ultimo_registro, novos_json_dados, id_usuario))
-                conn.commit()
+        inserir_relatorio_no_banco_dados(id_paciente, nome_paciente, data_nascimento, sexo)
 
         return jsonify({'mensagem': "Inserção bem-sucedida no banco de dados."}), 201
 
@@ -115,13 +90,12 @@ def inserir_exame_no_banco_dados():
             conn.close()
 
 
-def atualiza_exame_no_banco_dados(id):
+def atualiza_exame_no_banco_dados(id_p):
     """ATUALIZA EXAME"""
 
     dados = request.get_json('resposta')
     dados_exame_atualiza = dados['resposta']
     id_usuario = int(request.usuario[0])
-    # print("Dados atualizacao: ", dados_exame_atualiza['nome_exame'])
 
     cursor = None
     conn = None
@@ -131,15 +105,12 @@ def atualiza_exame_no_banco_dados(id):
     try:
         conn = connectar_banco()
 
-        id_exame = int(id)
+        id_exame = int(id_p)
 
-        json_dados_atualizacao = json.dumps(
-            dados_exame_atualiza['lista_dados'])
-
-        dados_exame_atualiza['observacao'] = analisa_dados_range_referencia(
-            dados_exame_atualiza['lista_dados'])
-
-        # print("Observacao", dados_exame['observacao'])
+        json_dados_atualizacao = json.dumps(dados_exame_atualiza['lista_dados'])
+        dados_exame_atualiza['observacao'] = analisa_dados_range_referencia(dados_exame_atualiza['lista_dados'])
+        nota=dados_exame_atualiza['observacao'][0]
+        lista_valores_cr_in=dados_exame_atualiza['observacao'][1]
 
         with conn.cursor() as cursor:
 
@@ -149,46 +120,27 @@ def atualiza_exame_no_banco_dados(id):
                 WHERE id = %s and id_usuario=%s
                 RETURNING *;
             """, (dados_exame_atualiza['nome_exame'],
-                  json_dados_atualizacao, dados_exame_atualiza['observacao'], data_atual, id_exame, id_usuario))
+                  json_dados_atualizacao, nota, data_atual, id_exame, id_usuario))
 
             conn.commit()
 
-            atualizacao = cursor.fetchone()
+            if id_exame:
+                atualizar_dados_paranalisador(lista_valores_cr_in, data_atual,  id_exame)
+
+            atualizacao = cursor.fetchone()    
+
+            if not atualizacao:
+                return jsonify({'error': 'Erro no servidor ao tentar atualiza cadastro usuario'}), 500    
+
+
             lista_gerada = list(atualizacao)
             id_paciente = lista_gerada[-1]
 
-            if not atualizacao:
-                return jsonify({'error': 'Erro no servidor ao tentar atualiza cadastro usuario'}), 500
+            atualiza_relatorio_no_banco_dados(id_paciente)
 
-        dados = get_banco_exames_exclusiva(id_paciente)
-        novos_dados = ordena_novo_json(dados[0])
-        data_1=novos_dados["data_1"]
-        data_2=novos_dados["data_2"]
-        data_3=novos_dados["data_3"]
-        data_primeiro_registro=novos_dados["data_primeiro_registro"]
-        data_ultimo_registro=novos_dados["data_ultimo_registro"]
-
-        novos_json_dados = json.dumps(novos_dados["dados_estatistico"])
-
-        with conn.cursor() as cursor:
-            if id_paciente:
-                cursor.execute(
-                        """UPDATE relatorios
-                        SET lista_dados=%s,  data_1=%s, data_2=%s, data_3=%s, data_primeiro_registro=%s, data_ultimo_registro=%s
-                        WHERE id_usuario=%s and id_paciente=%s
-                        RETURNING *;""",
-                        (novos_json_dados, data_1, data_2, data_3, data_primeiro_registro, data_ultimo_registro, id_usuario, id_paciente))
-                conn.commit()
-            else:
-                cursor.execute(
-                        """UPDATE relatorios
-                        SET lista_dados=%s, data_1=%s, data_2=%s, data_3=%s, data_primeiro_registro=%s, data_ultimo_registro=%s
-                        WHERE id_usuario=%s
-                        RETURNING *;""",
-                        (novos_json_dados, data_1, data_2, data_3, data_primeiro_registro, data_ultimo_registro, id_usuario))
-                conn.commit()
 
         return jsonify({"mensagem": "Atualização realizada com sucesso."}), 201
+    
 
     except Exception as e:
         print(f"Erro atualiza exame banco de dados: {e}")
@@ -210,18 +162,43 @@ def deletar_exame_banco_dados(id):
 
     try:
 
+        if id_exame:
+            deletar_dados_paranalisador(id_exame)
+
         conn = connectar_banco()
-        cursor = conn.cursor()
 
-        cursor.execute("SELECT * FROM files WHERE id=%s", (id_exame,))
-        exame = cursor.fetchone()
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT * FROM files WHERE id=%s", (id_exame, ))
+            exame = cursor.fetchone()
 
-        if not exame:
-            return jsonify({'mensagem': 'Exame não encontrado.'}), 404
+            if not exame:
+                return jsonify({'mensagem': 'Exame não encontrado.'}), 404
+            
+            lista_gerada = list(exame)
+            id_paciente = lista_gerada[-1]
+            
 
-        cursor.execute(
-            "DELETE FROM files WHERE id=%s and id_usuario=%s", (id_exame, id_usuario))
-        conn.commit()
+            cursor.execute("DELETE FROM files WHERE id=%s AND id_usuario=%s", (id_exame, id_usuario ))
+            
+            
+            if id_paciente:
+                cursor.execute("SELECT * FROM files WHERE id_paciente=%s AND id_usuario=%s", (id_paciente, id_usuario ))
+            else:
+                cursor.execute("SELECT * FROM files WHERE id_usuario=%s", (id_usuario, ))
+
+            conn.commit()        
+
+
+            todos_exames = cursor.fetchall()
+            if not todos_exames:
+                deletar_relatorio_no_banco_dados(id_paciente)
+                return jsonify({'error': 'Erro no servidor '}), 500  
+
+
+            print("Foi")
+            atualiza_relatorio_no_banco_dados(id_paciente)
+            print("Depois")  
+
 
         return jsonify({"mensagem": "Exame deletado com sucesso.", "id_deletado": id_exame}), 200
 
@@ -229,8 +206,6 @@ def deletar_exame_banco_dados(id):
         # print("Erro ao deletar exame do banco de dados:", e)
         return jsonify({'mensagem': 'Erro ao deletar o exame do banco de dados'}), 500
     finally:
-        if cursor:
-            cursor.close()
         if conn:
             conn.close()
 
@@ -395,6 +370,7 @@ def get_banco_exames():
         lista_dados_novos = copy.deepcopy(lista_dados)
 
         get_dados_info(lista_dados_novos, result_list, funcao_or_dados)
+        ordenar_dados_lista(lista_dados_novos)
 
         return jsonify(lista_dados_novos), 200
 
@@ -440,57 +416,3 @@ def get_dados_relatorio():
             conn.close()
 
 
-def get_banco_exames_exclusiva(id=None):
-    """FAZER UM GET DOS EXAMES DE DADOS NO BANCO PARA OS GRAFICOS"""
-
-    id_usuario = int(request.usuario[0])
-    id_paciente = id
-
-    if id_paciente:
-        id_paciente = int(id_paciente)
-
-    cursor = None
-    conn = None
-
-    try:
-        # Substitua as informações de conexão conforme necessário
-        conn = connectar_banco()
-        cursor = conn.cursor()
-
-        if id_paciente:
-            cursor.execute(
-                "SELECT * FROM files where id_paciente=%s and id_usuario=%s", (id_paciente, id_usuario))
-        else:
-            cursor.execute(
-                "SELECT * FROM files where id_usuario=%s", (id_usuario,))
-
-        rows = cursor.fetchall()
-
-        result_list = []
-        for row in rows:
-            result_dict = {
-                'id': row[0],
-                'nome_exame': row[1],
-                'url_exame': row[2],
-                'lista_dados': row[3],
-                'observacao': row[4],
-                'data_exame': row[5],
-                'id_usuario': row[6]
-            }
-            result_list.append(result_dict)
-
-        lista_dados_novos = copy.deepcopy(lista_dados)
-
-        get_dados_info(lista_dados_novos, result_list, funcao_or_dados)
-        valor_max_min_med(lista_dados_novos)
-
-        return [lista_dados_novos, len(rows)]
-
-    except Exception as e:
-        print("Erro ao consultar o banco de dados:", e)
-        return jsonify({'error': 'Erro ao consultar o banco de dados'}), 500
-    finally:
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
